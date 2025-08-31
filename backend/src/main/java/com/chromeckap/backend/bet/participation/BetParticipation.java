@@ -7,26 +7,27 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @Entity
 @Table(name = "bet_participations")
 public class BetParticipation extends AuditingEntity {
 
+    @Builder.Default
     private boolean isCorrect = false;
 
     @ManyToOne
-    @JoinColumn(name = "bet_id")
+    @JoinColumn(name = "bet_id", nullable = false)
     private Bet bet;
 
     @ManyToOne
     @JoinColumn(name = "selected_option_id", nullable = false)
     private BetOption selectedOption;
+
 }

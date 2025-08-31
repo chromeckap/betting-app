@@ -10,17 +10,21 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @Entity
 @Table(name = "bet_options")
 public class BetOption extends BaseEntity {
+
     private String name;
 
     @ManyToOne
     @JoinColumn(name = "bet_id")
     private Bet bet;
+
 }

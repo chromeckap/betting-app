@@ -1,6 +1,7 @@
 package com.chromeckap.backend.category;
 
 import com.chromeckap.backend.bet.Bet;
+import com.chromeckap.backend.bet.BetStatus;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.common.AuditingEntity;
 import jakarta.persistence.*;
@@ -30,5 +31,12 @@ public class Category extends AuditingEntity {
     @Builder.Default
     @OrderBy("createdAt asc")
     private List<Bet> bets = new ArrayList<>();
+
+    @Transient
+    public long getActiveBetsCount() {
+        return bets.stream()
+                .filter(bet -> BetStatus.OPEN == bet.getStatus())
+                .count();
+    }
 
 }
