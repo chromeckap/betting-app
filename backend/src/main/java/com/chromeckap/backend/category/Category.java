@@ -21,7 +21,7 @@ import java.util.List;
 public class Category extends AuditingEntity {
 
     @Column(nullable = false)
-    private String title;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)

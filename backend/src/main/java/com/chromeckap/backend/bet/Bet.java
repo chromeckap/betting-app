@@ -21,7 +21,7 @@ import java.util.List;
 public class Bet extends AuditingEntity {
 
     @Column(nullable = false)
-    private String title;
+    private String name;
 
     private String description;
 
@@ -29,7 +29,7 @@ public class Bet extends AuditingEntity {
     private LocalDateTime deadline;
 
     @Builder.Default
-    private boolean resolved = false;
+    private boolean isResolved = false;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -39,7 +39,7 @@ public class Bet extends AuditingEntity {
     private BetType type;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @OneToMany(mappedBy = "bet", cascade = CascadeType.REMOVE, orphanRemoval = true)

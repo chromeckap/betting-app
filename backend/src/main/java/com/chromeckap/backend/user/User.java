@@ -1,14 +1,12 @@
 package com.chromeckap.backend.user;
 
 import com.chromeckap.backend.bet.Bet;
+import com.chromeckap.backend.bet.participation.BetParticipation;
 import com.chromeckap.backend.category.Category;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupMembership;
 import com.chromeckap.backend.common.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -27,8 +25,10 @@ public class User extends BaseEntity {
 
     private static final int LAST_ACTIVE_INTERVAL = 5;
 
+    @Column(nullable = false)
     private String username;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     private LocalDateTime lastSeen;
@@ -41,6 +41,9 @@ public class User extends BaseEntity {
     @Builder.Default
     private List<Bet> bets = new ArrayList<>();
 
+    @OneToMany(mappedBy = "createdBy")
+    @Builder.Default
+    private List<BetParticipation> betParticipations = new ArrayList<>();
 
     @OneToMany(mappedBy = "createdBy")
     @Builder.Default
@@ -52,7 +55,11 @@ public class User extends BaseEntity {
 
     @Transient
     public boolean isUserOnline() {
-        return lastSeen != null && lastSeen.isAfter(LocalDateTime.now().minusMinutes(LAST_ACTIVE_INTERVAL));
+        return lastSeen != null
+                && lastSeen.isAfter(
+                        LocalDateTime.now()
+                                .minusMinutes(LAST_ACTIVE_INTERVAL)
+        );
     }
 
 }
