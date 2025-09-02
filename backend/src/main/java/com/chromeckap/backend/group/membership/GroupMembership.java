@@ -1,6 +1,8 @@
-package com.chromeckap.backend.group;
+package com.chromeckap.backend.group.membership;
 
 import com.chromeckap.backend.common.AuditingEntity;
+import com.chromeckap.backend.group.Group;
+import com.chromeckap.backend.group.GroupRole;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

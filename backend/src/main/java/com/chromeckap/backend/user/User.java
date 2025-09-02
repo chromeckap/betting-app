@@ -4,7 +4,7 @@ import com.chromeckap.backend.bet.Bet;
 import com.chromeckap.backend.bet.participation.BetParticipation;
 import com.chromeckap.backend.category.Category;
 import com.chromeckap.backend.group.Group;
-import com.chromeckap.backend.group.GroupMembership;
+import com.chromeckap.backend.group.membership.GroupMembership;
 import com.chromeckap.backend.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
