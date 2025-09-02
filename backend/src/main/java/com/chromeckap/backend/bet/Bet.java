@@ -31,6 +31,10 @@ public class Bet extends AuditingEntity {
     @Builder.Default
     private boolean isResolved = false;
 
+    @ManyToOne
+    @JoinColumn(name = "correct_option_id")
+    private BetOption correctOption;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private BetStatus status = BetStatus.OPEN;
