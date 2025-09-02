@@ -1,0 +1,53 @@
+# USERS
+
+1. As a guest, I want to register using my email and password so that I can use the app.
+2. As a guest, I want to log in using my email and password so that I can access my account.
+3. As a logged-in user, I want to log out.
+4. As a user, I want to view my profile (name, email, group overview, profile picture).
+5. As a user, I want to edit my profile (profile picture, password).
+6. As a user, I want to delete my account.
+
+# GROUPS
+
+7. As a user, I want to create a group so others can bet with me.
+8. As a user, I want to join a group using a code so that I become a member.
+9. As a group admin, I want to manage the group’s information.
+10. As a group admin, I want to delete the group so it is no longer accessible.
+11. As a group admin, I want to remove a user from the group if they break the rules.
+12. As a group admin, I want to assign or revoke the admin role to/from another group member.
+13. As a group member, I want to view the list of group members and their roles.
+
+# CATEGORIES
+
+14. As a group admin, I want to create a category where bets can be added.
+15. As a group admin, I want to edit the name of a category.
+16. As a group admin, I want to delete a category.
+17. As a group member, I want to view the list of all categories.
+
+# BETS
+
+18. As a group admin, I want to create a bet with a question, type (yes/no or multiple choice), answer options, and a deadline.
+19. As a group admin, I want to edit a bet before it starts.
+20. As a group admin, I want to delete a bet if it hasn't started yet.
+21. As a group admin, I want to close a bet for voting after a specific time.
+22. As a group admin, I want to evaluate a bet by selecting the correct option.
+23. As a group admin, I want to see who voted for which option.
+24. As a group admin, I want to see who won or lost the bet.
+
+# PARTICIPATING IN BETS
+
+25. As a group member, I want to view a list of active bets.
+26. As a group member, I want to vote on a bet by selecting an option.
+27. As a group member, I want to see what I have bet on in the past and the outcomes.
+28. As a group member, I want to view the results of closed bets and the correct answers.
+29. As a group member, I want to see my betting statistics within the group (e.g. number of wins/losses).
+
+# SCORING & STATS
+
+30. As a group admin, I want to configure the scoring system for bets (e.g. correct answer = +1 point).
+31. As a group member, I want to view the leaderboard of users based on their points.
+
+# NOTIFICATIONS
+
+32. As a group member, I want to receive a notification when a new bet is created.
+33. As a group member, I want to receive a notification when a bet is closed and evaluated.
