@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/groups/{groupId}/categories")
 @RequiredArgsConstructor
 @Slf4j
 public class CategoryController {
 
-    @GetMapping("/groups/{groupId}/categories")
+    @GetMapping
     public ResponseEntity<List<CategoryResponse>> getCategoriesByGroupId(
             @PathVariable final Long groupId
     ) {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/groups/{groupId}/categories")
+    @PostMapping
     public ResponseEntity<Void> createCategory(
             @PathVariable final Long groupId,
             @Valid @RequestBody final CategoryRequest request
@@ -29,16 +29,18 @@ public class CategoryController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/categories/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Void> updateCategory(
+            @PathVariable final Long groupId,
             @PathVariable final Long id,
             @Valid @RequestBody final CategoryRequest request
     ) {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(
+            @PathVariable final Long groupId,
             @PathVariable final Long id
     ) {
         return ResponseEntity.ok().build();
