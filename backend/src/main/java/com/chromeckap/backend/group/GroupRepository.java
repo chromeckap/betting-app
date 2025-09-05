@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 interface GroupRepository extends JpaRepository<Group, Long> {
+    Group findByInviteCodeEquals(String inviteCode);
 }
