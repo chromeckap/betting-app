@@ -23,22 +23,22 @@ public class GroupController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createGroup(
+    public ResponseEntity<Long> createGroup(
             @Valid @RequestBody final GroupRequest request
     ) {
         log.info("Creating group {}", request);
-        groupService.createGroup(request);
-        return ResponseEntity.ok().build();
+        Long response = groupService.createGroup(request);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateGroup(
+    public ResponseEntity<Long> updateGroup(
             @PathVariable final Long id,
             @Valid @RequestBody final GroupRequest request
     ) {
         log.info("Updating group {} with id {}", request, id);
-        groupService.updateGroup(id, request);
-        return ResponseEntity.ok().build();
+        Long response = groupService.updateGroup(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

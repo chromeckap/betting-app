@@ -9,15 +9,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class GroupService {
-    public GroupResponse getGroupById(Long id) {
+    private final GroupRepository groupRepository;
+    private final GroupMapper groupMapper;
+    private final GroupValidator groupValidator;
+
+
+    public GroupResponse getGroupById(final Long id) {
     }
 
-    public void createGroup(@Valid GroupRequest request) {
+    public Long createGroup(@Valid final GroupRequest request) {
     }
 
-    public void updateGroup(Long id, @Valid GroupRequest request) {
+    public Long updateGroup(final Long id, final @Valid GroupRequest request) {
     }
 
-    public void deleteGroup(Long id) {
+    public void deleteGroup(final Long id) {
     }
 }
