@@ -1,6 +1,9 @@
 package com.chromeckap.backend.group;
 
-public record GroupResponse(
+import lombok.Builder;
 
-) {
-}
+@Builder
+public record GroupResponse(
+        String name,
+        String inviteCode
+) {}

@@ -11,33 +11,42 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 public class GroupController {
+    private final GroupService groupService;
 
     @GetMapping("/{id}")
     public ResponseEntity<GroupResponse> getGroupById(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Fetching group with id {}", id);
+        GroupResponse response = groupService.getGroupById(id);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<Void> createGroup(
+    public ResponseEntity<Long> createGroup(
             @Valid @RequestBody final GroupRequest request
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Creating group {}", request);
+        Long response = groupService.createGroup(request);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateGroup(
+    public ResponseEntity<Long> updateGroup(
             @PathVariable final Long id,
             @Valid @RequestBody final GroupRequest request
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Updating group {} with id {}", request, id);
+        Long response = groupService.updateGroup(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroup(
             @PathVariable final Long id
     ) {
+        log.info("Deleting group with id {}", id);
+        groupService.deleteGroup(id);
         return ResponseEntity.noContent().build();
     }
 
