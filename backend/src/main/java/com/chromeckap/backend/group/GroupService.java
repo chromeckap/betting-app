@@ -1,6 +1,7 @@
 package com.chromeckap.backend.group;
 
 import com.chromeckap.backend.exception.GroupNotFoundException;
+import com.chromeckap.backend.utils.InviteCodeGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,8 @@ public class GroupService {
         log.debug("Creating group {}", request);
 
         Group group = groupMapper.toEntity(request);
+        group.setInviteCode(InviteCodeGenerator.generate());
+
         Group savedGroup = groupRepository.save(group);
         log.info("Successfully created group {}", savedGroup);
 
