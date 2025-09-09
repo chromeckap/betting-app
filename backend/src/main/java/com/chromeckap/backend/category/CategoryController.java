@@ -13,29 +13,36 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class CategoryController {
+    private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> getCategoriesByGroupId(
+    public ResponseEntity<List<CategoryResponse>> getCategoriesInGroup(
             @PathVariable final Long groupId
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Fetching categories in group with id {}", groupId);
+        List<CategoryResponse> response = categoryService.getCategoriesInGroup(groupId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<Void> createCategory(
+    public ResponseEntity<Long> createCategory(
             @PathVariable final Long groupId,
             @Valid @RequestBody final CategoryRequest request
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Creating category {} for group with id {}", request, groupId);
+        Long response = categoryService.createCategory(groupId, request);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCategory(
+    public ResponseEntity<Long> updateCategory(
             @PathVariable final Long groupId,
             @PathVariable final Long id,
             @Valid @RequestBody final CategoryRequest request
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Updating category with id {} with body {}", id, request);
+        Long response = categoryService.updateCategory(groupId, id, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
@@ -43,6 +50,8 @@ public class CategoryController {
             @PathVariable final Long groupId,
             @PathVariable final Long id
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Deleting category with id {}", id);
+        categoryService.deleteCategory(groupId, id);
+        return ResponseEntity.noContent().build();
     }
 }
