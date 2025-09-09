@@ -1,4 +1,8 @@
 package com.chromeckap.backend.category;
 
-public record CategoryResponse() {
-}
+import lombok.Builder;
+
+@Builder
+public record CategoryResponse(
+        String name
+) {}
