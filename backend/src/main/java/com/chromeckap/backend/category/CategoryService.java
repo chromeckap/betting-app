@@ -3,6 +3,9 @@ package com.chromeckap.backend.category;
 import com.chromeckap.backend.exception.CategoryNotFoundException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupService;
+import com.chromeckap.backend.group.membership.GroupMembershipValidator;
+import com.chromeckap.backend.user.User;
+import com.chromeckap.backend.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,8 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final GroupService groupService;
+    private final UserService userService;
+    private final GroupMembershipValidator groupMembershipValidator;
 
     /**
      * Helper method for finding a category by id and group id.
@@ -45,8 +50,9 @@ public class CategoryService {
     public List<CategoryResponse> getCategoriesInGroup(final Long groupId) {
         log.debug("Getting categories in group with id {}", groupId);
 
-        // validate group exists
-        groupService.findGroupById(groupId);
+        Group group = groupService.findGroupById(groupId);
+        User user = userService.getCurrentUser();
+        groupMembershipValidator.validateUserIsMemberOfGroup(user, group);
 
         List<CategoryResponse> responses = categoryRepository.findByGroupId(groupId).stream()
                 .map(categoryMapper::toResponse)
@@ -68,6 +74,8 @@ public class CategoryService {
         log.debug("Creating category {} in group with id {}", request, groupId);
 
         Group group = groupService.findGroupById(groupId);
+        User user = userService.getCurrentUser();
+        groupMembershipValidator.validateAdminPermission(user, group);
 
         Category category = categoryMapper.toEntity(request);
         category.setGroup(group);
@@ -90,12 +98,16 @@ public class CategoryService {
     public Long updateCategory(final Long groupId, final Long id, @Valid final CategoryRequest request) {
         log.debug("Updating category with id {} in group {} using {}", id, groupId, request);
 
+        Group group = groupService.findGroupById(groupId);
+        User user = userService.getCurrentUser();
+        groupMembershipValidator.validateAdminPermission(user, group);
+
         Category category = this.findCategoryByIdAndGroupId(id, groupId);
-        Category updatedCategory = categoryMapper.updateEntityAttributes(category, request);
 
-        Category savedCategory = categoryRepository.save(updatedCategory);
+        categoryMapper.updateEntityAttributes(category, request);
+        Category savedCategory = categoryRepository.save(category);
+
         log.info("Successfully updated category with id {} in group {}", savedCategory.getId(), groupId);
-
         return savedCategory.getId();
     }
 
@@ -109,9 +121,13 @@ public class CategoryService {
     public void deleteCategory(final Long groupId, final Long id) {
         log.debug("Deleting category with id {} from group {}", id, groupId);
 
-        Category category = this.findCategoryByIdAndGroupId(id, groupId);
-        categoryRepository.delete(category);
+        Group group = groupService.findGroupById(groupId);
+        User user = userService.getCurrentUser();
+        groupMembershipValidator.validateAdminPermission(user, group);
 
+        Category category = this.findCategoryByIdAndGroupId(id, groupId);
+
+        categoryRepository.delete(category);
         log.info("Successfully deleted category with id {} from group {}", id, groupId);
     }
 }

@@ -2,6 +2,7 @@ package com.chromeckap.backend.group.membership;
 
 import com.chromeckap.backend.exception.UserHasNoAdminPermissionException;
 import com.chromeckap.backend.exception.UserIsMemberOfGroupException;
+import com.chromeckap.backend.exception.UserIsNotMemberOfGroupException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupRole;
 import com.chromeckap.backend.user.User;
@@ -25,5 +26,11 @@ public class GroupMembershipValidator {
         boolean isUserMemberOfGroup = groupMembershipRepository.existsByGroupAndCreatedBy(group, currentUser);
         if (isUserMemberOfGroup)
             throw new UserIsMemberOfGroupException("Group was not found.");
+    }
+
+    public void validateUserIsMemberOfGroup(User currentUser, Group group) {
+        boolean isUserMemberOfGroup = groupMembershipRepository.existsByGroupAndCreatedBy(group, currentUser);
+        if (!isUserMemberOfGroup)
+            throw new UserIsNotMemberOfGroupException("Group was not found.");
     }
 }
