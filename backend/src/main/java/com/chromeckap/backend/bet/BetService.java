@@ -126,7 +126,7 @@ public class BetService {
         bet = betMapper.updateEntityAttributes(bet, request);
 
         Bet savedBet = betRepository.save(bet);
-        //todo add availability to manage options
+        betOptionService.manageBetOptions(savedBet, request.options());
 
         log.info("Successfully updated bet with id {} in category {}", savedBet.getId(), categoryId);
 
