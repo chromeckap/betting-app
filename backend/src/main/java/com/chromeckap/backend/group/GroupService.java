@@ -16,6 +16,8 @@ public class GroupService {
     private final GroupMapper groupMapper;
     private final GroupValidator groupValidator;
 
+    //todo add permissions needed to execute methods
+
     /**
      * Helper method for finding a group by id.
      *

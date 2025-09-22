@@ -5,7 +5,9 @@ import com.chromeckap.backend.exception.UserIsMemberOfGroupException;
 import com.chromeckap.backend.exception.UserIsNotMemberOfGroupException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupRole;
+import com.chromeckap.backend.group.GroupService;
 import com.chromeckap.backend.user.User;
+import com.chromeckap.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,23 +16,33 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class GroupMembershipValidator {
+    private final GroupService groupService;
+    private final UserService userService;
     private final GroupMembershipRepository groupMembershipRepository;
 
-    public void validateAdminPermission(User user, Group group) {
-        groupMembershipRepository.findByGroupIdAndCreatedById(user.getId(), group.getId())
-                .filter(groupMembership -> groupMembership.getRole() == GroupRole.ADMIN)
+    public void requireUserIsGroupAdmin(Long groupId) {
+        Group group = groupService.findGroupById(groupId);
+        User user = userService.getCurrentUser();
+
+        groupMembershipRepository.findByGroupIdAndCreatedById(group.getId(), user.getId())
+                .filter(membership -> membership.getRole() == GroupRole.ADMIN)
                 .orElseThrow(UserHasNoAdminPermissionException::new);
     }
 
-    public void validateUserNotMemberOfGroup(User currentUser, Group group) {
-        boolean isUserMemberOfGroup = groupMembershipRepository.existsByGroupAndCreatedBy(group, currentUser);
-        if (isUserMemberOfGroup)
-            throw new UserIsMemberOfGroupException("Group was not found.");
+    public void requireUserIsGroupMember(Long groupId) {
+        Group group = groupService.findGroupById(groupId);
+        User user = userService.getCurrentUser();
+
+        boolean isMember = groupMembershipRepository.existsByGroupAndCreatedBy(group, user);
+        if (!isMember)
+            throw new UserIsNotMemberOfGroupException("User is not a member of this group.");
     }
 
-    public void validateUserIsMemberOfGroup(User currentUser, Group group) {
-        boolean isUserMemberOfGroup = groupMembershipRepository.existsByGroupAndCreatedBy(group, currentUser);
-        if (!isUserMemberOfGroup)
-            throw new UserIsNotMemberOfGroupException("Group was not found.");
+    public void requireUserNotGroupMember(Group group) {
+        User user = userService.getCurrentUser();
+
+        boolean isMember = groupMembershipRepository.existsByGroupAndCreatedBy(group, user);
+        if (isMember)
+            throw new UserIsMemberOfGroupException("User is a member of this group.");
     }
 }

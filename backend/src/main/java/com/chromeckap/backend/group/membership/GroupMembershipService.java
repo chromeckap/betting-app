@@ -53,7 +53,7 @@ public class GroupMembershipService {
         Group group = groupRepository.findByInviteCodeEquals(code)
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        groupMembershipValidator.validateUserNotMemberOfGroup(currentUser, group);
+        groupMembershipValidator.requireUserNotGroupMember(group);
 
         GroupMembership membership = groupMembershipMapper.toEntity(group, currentUser);
         groupMembershipRepository.save(membership);
@@ -76,7 +76,7 @@ public class GroupMembershipService {
         GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedById(groupId, userId)
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        groupMembershipValidator.validateAdminPermission(currentUser, membership.getGroup());
+        groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId());
 
         membership.setRole(role);
         groupMembershipRepository.save(membership);
@@ -100,7 +100,7 @@ public class GroupMembershipService {
 
         boolean isSelfRemoving = currentUser.getId().equals(userId);
         if (!isSelfRemoving) {
-            groupMembershipValidator.validateAdminPermission(currentUser, membership.getGroup());
+            groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId());
         }
 
         groupMembershipRepository.delete(membership);
