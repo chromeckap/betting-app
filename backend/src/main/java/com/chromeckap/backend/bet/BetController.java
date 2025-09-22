@@ -13,67 +13,83 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class BetController {
+    private final BetService betService;
 
     @GetMapping
     public ResponseEntity<List<BetResponse>> getBetsInCategory(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Fetching bets in category {} of group {}", categoryId, groupId);
+        List<BetResponse> responses = betService.getBetsInCategory(groupId, categoryId);
+        return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/{betId}")
+    @GetMapping("/{id}")
     public ResponseEntity<BetResponse> getBetById(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @PathVariable final Long betId
+            @PathVariable final Long id
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Fetching bet {} in category {} of group {}", id, categoryId, groupId);
+        BetResponse response = betService.getBetById(groupId, categoryId, id);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<Void> createBet(
+    public ResponseEntity<Long> createBet(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
             @Valid @RequestBody final BetRequest request
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Creating bet {} in category {} of group {}", request, categoryId, groupId);
+        Long response = betService.createBet(groupId, categoryId, request);
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{betId}")
-    public ResponseEntity<Void> updateBet(
+    @PutMapping("/{id}")
+    public ResponseEntity<Long> updateBet(
             @PathVariable final Long groupId,
-            @PathVariable final Long betId,
+            @PathVariable final Long categoryId,
+            @PathVariable final Long id,
             @Valid @RequestBody final BetRequest request
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Updating bet {} in category {} of group {} with body {}", id, categoryId, groupId, request);
+        Long response = betService.updateBet(groupId, categoryId, id, request);
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{betId}/close")
+    @PutMapping("/{id}/close")
     public ResponseEntity<Void> closeBet(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @PathVariable final Long betId
+            @PathVariable final Long id
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Closing bet {} in category {} of group {}", id, categoryId, groupId);
+        betService.closeBet(groupId, categoryId, id);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{betId}/evaluate")
+    @PutMapping("/{id}/evaluate/{correctOptionId}")
     public ResponseEntity<Void> evaluateBet(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @PathVariable final Long betId
+            @PathVariable final Long id,
+            @PathVariable final Long correctOptionId
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Evaluating bet {} in category {} of group {}", id, categoryId, groupId);
+        betService.evaluateBet(groupId, categoryId, id, correctOptionId);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{betId}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBet(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @PathVariable final Long betId
+            @PathVariable final Long id
     ) {
-        return ResponseEntity.ok().build();
+        log.info("Deleting bet {} in category {} of group {}", id, categoryId, groupId);
+        betService.deleteBet(groupId, categoryId, id);
+        return ResponseEntity.noContent().build();
     }
-
 }

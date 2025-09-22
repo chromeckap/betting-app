@@ -20,6 +20,7 @@ import java.util.List;
 @Table(name = "bets")
 public class Bet extends AuditingEntity {
 
+    //todo er-diagram has title, change attribute to name
     @Column(nullable = false)
     private String name;
 
