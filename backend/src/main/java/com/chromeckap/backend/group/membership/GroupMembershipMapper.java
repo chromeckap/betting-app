@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class GroupMembershipMapper {
 
-    public GroupMembership toEntity(Group group, String userId) {
+    public GroupMembership toEntity(Group group) {
         return GroupMembership.builder()
                 .group(group)
-                .createdBy(userId)
                 .build();
     }
 }

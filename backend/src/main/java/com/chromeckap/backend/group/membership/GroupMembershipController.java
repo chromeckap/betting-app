@@ -51,11 +51,11 @@ public class GroupMembershipController {
     @DeleteMapping("/{groupId}/users/{userId}")
     public ResponseEntity<Void> removeUserFromGroup(
             @PathVariable final Long groupId,
-            @PathVariable final Long userId,
+            @PathVariable final String userId,
             Authentication connectedUser
     ) {
         log.info("Removing user with id {} from group with id {}", userId, groupId);
-        groupMembershipService.removeUserFromGroup(groupId, connectedUser);
+        groupMembershipService.removeUserFromGroup(groupId, userId, connectedUser);
         return ResponseEntity.noContent().build();
     }
 }

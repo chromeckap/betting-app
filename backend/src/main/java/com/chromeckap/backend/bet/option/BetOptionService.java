@@ -28,11 +28,11 @@ public class BetOptionService {
     private final BetOptionMapper betOptionMapper;
 
     @Transactional(readOnly = true)
-    public BetOption findBetOptionByIdAndBet(Long optionId, Bet bet) {
-        return betOptionRepository.findByIdAndBet(optionId, bet)
+    public BetOption findBetOptionById(Long optionId) {
+        return betOptionRepository.findById(optionId)
                 .orElseThrow(() -> new BetNotFoundException(
-                        "Bet option with id %s was not found in bet %s."
-                                .formatted(optionId, bet.getId())
+                        "Bet option with id %s was not found."
+                                .formatted(optionId)
                 ));
     }
 
@@ -113,11 +113,8 @@ public class BetOptionService {
     private List<BetOption> getOptionsToCreate(Bet bet, List<BetOptionRequest> requests) {
         return requests.stream()
                 .filter(r -> r.id() == null)
-                .map(r -> {
-                    BetOption option = betOptionMapper.toEntity(r);
-                    option.setBet(bet);
-                    return option;
-                })
+                .map(r -> betOptionMapper.toEntity(r)
+                        .withBet(bet))
                 .toList();
     }
 

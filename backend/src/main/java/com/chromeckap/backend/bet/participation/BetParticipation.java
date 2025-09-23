@@ -10,13 +10,13 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@Setter
+@Setter(AccessLevel.PROTECTED)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 @Entity
 @Table(name = "bet_participations")
-public class BetParticipation extends AuditingEntity {
+public class BetParticipation extends AuditingEntity<BetParticipation> {
 
     @Builder.Default
     private boolean isCorrect = false;

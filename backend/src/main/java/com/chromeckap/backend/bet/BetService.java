@@ -97,8 +97,9 @@ public class BetService {
         groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
         Category category = categoryService.findCategoryByIdAndGroupId(groupId, categoryId);
 
-        Bet bet = betMapper.toEntity(request);
-        bet.setCategory(category);
+        Bet bet = betMapper.toEntity(request)
+                .withCategory(category)
+                .withCreatedBy(connectedUser.getName());
 
         Bet savedBet = betRepository.save(bet);
         betOptionService.manageBetOptions(savedBet, request.options());
@@ -147,8 +148,8 @@ public class BetService {
 
         groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
 
-        Bet bet = this.findBetByIdAndCategoryId(id, categoryId);
-        bet.setStatus(BetStatus.CLOSED);
+        Bet bet = this.findBetByIdAndCategoryId(id, categoryId)
+                .withStatus(BetStatus.CLOSED);
 
         betRepository.save(bet);
         log.info("Successfully closed bet with id {} in category {}", bet.getId(), categoryId);
@@ -167,12 +168,11 @@ public class BetService {
 
         groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
 
-        Bet bet = this.findBetByIdAndCategoryId(id, categoryId);
-        BetOption correctOption = betOptionService.findBetOptionByIdAndBet(correctOptionId, bet);
-
-        bet.setCorrectOption(correctOption);
-        bet.setStatus(BetStatus.RESOLVED);
-        bet.setResolved(true);
+        BetOption correctOption = betOptionService.findBetOptionById(correctOptionId);
+        Bet bet = this.findBetByIdAndCategoryId(id, categoryId)
+                .withStatus(BetStatus.RESOLVED)
+                .withResolved(true)
+                .withCorrectOption(correctOption);
 
         betRepository.save(bet);
         log.info("Successfully resolved bet with id {} in category {}", bet.getId(), categoryId);

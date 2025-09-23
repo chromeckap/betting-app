@@ -53,7 +53,9 @@ public class GroupMembershipService {
 
         groupMembershipValidator.requireUserNotGroupMember(group, connectedUser);
 
-        GroupMembership membership = groupMembershipMapper.toEntity(group, connectedUser.getName());
+        GroupMembership membership = groupMembershipMapper.toEntity(group)
+                .withCreatedBy(connectedUser.getName());
+
         groupMembershipRepository.save(membership);
 
         log.info("User {} joined group {}", connectedUser.getName(), group.getId());
@@ -85,16 +87,17 @@ public class GroupMembershipService {
      * Remove a user from a group.
      *
      * @param groupId the group id
-     * @param userId  the user id
+     * @param userId the id of the user to be deleted
+     * @param connectedUser  the connected user
      */
     @Transactional
-    public void removeUserFromGroup(final Long groupId, final Authentication connectedUser) {
+    public void removeUserFromGroup(final Long groupId, final String userId, final Authentication connectedUser) {
         log.debug("Removing user {} from group {}", connectedUser.getName(), groupId);
 
         GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, connectedUser.getName())
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        boolean isSelfRemoving = false; //currentUser.getId().equals(userId);
+        boolean isSelfRemoving = connectedUser.getName().equals(userId);
         if (!isSelfRemoving) {
             groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId(), connectedUser);
         }

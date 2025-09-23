@@ -20,7 +20,7 @@ public class CategoryMapper {
     }
 
     public Category updateEntityAttributes(Category category, @Valid CategoryRequest request) {
-        category.setName(request.name());
-        return category;
+        return category
+                .withName(request.name());
     }
 }

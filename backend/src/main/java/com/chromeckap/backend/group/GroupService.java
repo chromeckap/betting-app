@@ -5,6 +5,7 @@ import com.chromeckap.backend.utils.InviteCodeGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,11 +55,12 @@ public class GroupService {
      * @return the id of the newly created group
      */
     @Transactional
-    public Long createGroup(@Valid final GroupRequest request) {
+    public Long createGroup(@Valid final GroupRequest request, Authentication connectedUser) {
         log.debug("Creating group {}", request);
 
-        Group group = groupMapper.toEntity(request);
-        group.setInviteCode(InviteCodeGenerator.generate());
+        Group group = groupMapper.toEntity(request)
+                .withInviteCode(InviteCodeGenerator.generate())
+                .withCreatedBy(connectedUser.getName());
 
         Group savedGroup = groupRepository.save(group);
         log.info("Successfully created group {}", savedGroup);

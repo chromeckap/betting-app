@@ -23,8 +23,8 @@ public class GroupMapper {
     }
 
     public Group updateEntityAttributes(Group group, @Valid GroupRequest request) {
-        group.setName(request.name());
-        group.setInviteCode(request.inviteCode());
-        return group;
+        return group
+                .withName(request.name())
+                .withInviteCode(request.inviteCode());
     }
 }

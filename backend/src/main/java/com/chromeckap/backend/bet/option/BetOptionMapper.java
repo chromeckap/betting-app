@@ -13,7 +13,7 @@ public class BetOptionMapper {
     }
 
     public BetOption updateEntityAttributes(BetOption betOption, @Valid BetOptionRequest request) {
-        betOption.setName(request.name());
-        return betOption;
+        return betOption
+                .withName(request.name());
     }
 }

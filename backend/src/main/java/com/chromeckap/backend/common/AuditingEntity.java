@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
-public abstract class AuditingEntity extends BaseEntity {
+public abstract class AuditingEntity<T extends AuditingEntity<T>> extends BaseEntity {
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
@@ -32,4 +32,9 @@ public abstract class AuditingEntity extends BaseEntity {
     @Column(name = "user_id", nullable = false, updatable = false)
     private String createdBy;
 
+    @SuppressWarnings("unchecked")
+    public T withCreatedBy(String createdBy) {
+        this.setCreatedBy(createdBy);
+        return (T) this;
+    }
 }

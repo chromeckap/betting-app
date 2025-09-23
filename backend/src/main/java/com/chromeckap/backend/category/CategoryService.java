@@ -4,6 +4,7 @@ import com.chromeckap.backend.exception.CategoryNotFoundException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupService;
 import com.chromeckap.backend.group.membership.GroupMembershipValidator;
+import com.chromeckap.backend.utils.InviteCodeGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,8 +74,9 @@ public class CategoryService {
         Group group = groupService.findGroupById(groupId);
         groupMembershipValidator.requireUserIsGroupAdmin(group.getId(), connectedUser);
 
-        Category category = categoryMapper.toEntity(request);
-        category.setGroup(group);
+        Category category = categoryMapper.toEntity(request)
+                .withGroup(group)
+                .withCreatedBy(connectedUser.getName());
 
         Category savedCategory = categoryRepository.save(category);
         log.info("Successfully created category with id {} in group {}", savedCategory.getId(), groupId);

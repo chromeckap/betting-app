@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
+@Setter(AccessLevel.PROTECTED)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 @Entity
 @Table(name = "categories")
-public class Category extends AuditingEntity {
+public class Category extends AuditingEntity<Category> {
 
     @Column(nullable = false)
     private String name;
@@ -39,4 +39,13 @@ public class Category extends AuditingEntity {
                 .count();
     }
 
+    public Category withName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Category withGroup(Group group) {
+        this.group = group;
+        return this;
+    }
 }
