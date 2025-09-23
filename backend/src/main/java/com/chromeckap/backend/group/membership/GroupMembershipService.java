@@ -1,14 +1,14 @@
 package com.chromeckap.backend.group.membership;
 
+import com.chromeckap.backend.common.AuditingEntity;
 import com.chromeckap.backend.exception.GroupNotFoundException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupRepository;
 import com.chromeckap.backend.group.GroupRole;
-import com.chromeckap.backend.user.User;
-import com.chromeckap.backend.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +20,6 @@ import java.util.List;
 public class GroupMembershipService {
     private final GroupMembershipRepository groupMembershipRepository;
     private final GroupRepository groupRepository;
-    private final UserService userService;
     private final GroupMembershipMapper groupMembershipMapper;
     private final GroupMembershipValidator groupMembershipValidator;
 
@@ -36,7 +35,7 @@ public class GroupMembershipService {
 
         List<GroupMembership> memberships = groupMembershipRepository.findByGroupId(groupId);
         return memberships.stream()
-                .map(m -> m.getCreatedBy().getUsername())
+                .map(GroupMembership::getCreatedBy)
                 .toList();
     }
 
@@ -46,42 +45,40 @@ public class GroupMembershipService {
      * @param code the invite code
      */
     @Transactional
-    public void joinGroupByCode(final String code) {
+    public void joinGroupByCode(final String code, Authentication connectedUser) {
         log.debug("User attempting to join group with code {}", code);
 
-        User currentUser = userService.getCurrentUser();
         Group group = groupRepository.findByInviteCodeEquals(code)
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        groupMembershipValidator.requireUserNotGroupMember(group);
+        groupMembershipValidator.requireUserNotGroupMember(group, connectedUser);
 
-        GroupMembership membership = groupMembershipMapper.toEntity(group, currentUser);
+        GroupMembership membership = groupMembershipMapper.toEntity(group, connectedUser.getName());
         groupMembershipRepository.save(membership);
 
-        log.info("User {} joined group {}", currentUser.getUsername(), group.getId());
+        log.info("User {} joined group {}", connectedUser.getName(), group.getId());
     }
 
     /**
      * Update a user's role in a group.
      *
      * @param groupId the group id
-     * @param userId  the user id
+     * @param connectedUser  the connected user
      * @param role    the new role
      */
     @Transactional
-    public void updateUserRoleInGroup(final Long groupId, final Long userId, @Valid final GroupRole role) {
-        log.debug("Updating role for user {} in group {} to {}", userId, groupId, role);
+    public void updateUserRoleInGroup(final Long groupId, final Authentication connectedUser, @Valid final GroupRole role) {
+        log.debug("Updating role for user {} in group {} to {}", connectedUser.getName(), groupId, role);
 
-        User currentUser = userService.getCurrentUser();
-        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedById(groupId, userId)
+        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, connectedUser.getName())
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId());
+        groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId(), connectedUser);
 
         membership.setRole(role);
         groupMembershipRepository.save(membership);
 
-        log.info("Updated role for user {} in group {} to {}", userId, groupId, role);
+        log.info("Updated role for user {} in group {} to {}", connectedUser.getName(), groupId, role);
     }
 
     /**
@@ -91,19 +88,18 @@ public class GroupMembershipService {
      * @param userId  the user id
      */
     @Transactional
-    public void removeUserFromGroup(final Long groupId, final Long userId) {
-        log.debug("Removing user {} from group {}", userId, groupId);
+    public void removeUserFromGroup(final Long groupId, final Authentication connectedUser) {
+        log.debug("Removing user {} from group {}", connectedUser.getName(), groupId);
 
-        User currentUser = userService.getCurrentUser();
-        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedById(groupId, userId)
+        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, connectedUser.getName())
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        boolean isSelfRemoving = currentUser.getId().equals(userId);
+        boolean isSelfRemoving = false; //currentUser.getId().equals(userId);
         if (!isSelfRemoving) {
-            groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId());
+            groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId(), connectedUser);
         }
 
         groupMembershipRepository.delete(membership);
-        log.info("User {} removed from group {}", userId, groupId);
+        log.info("User {} removed from group {}", connectedUser.getName(), groupId);
     }
 }

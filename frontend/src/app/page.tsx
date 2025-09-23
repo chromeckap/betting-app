@@ -1,12 +1,18 @@
-import { Button } from "@/components/ui/button"
-import {IconBrandReact} from "@tabler/icons-react";
+'use client';
 
-export default function Home() {
+import { useAuth } from '@/context/AuthContext';
+import keycloak from "@/lib/keycloak";
+
+export default function ProtectedPage() {
+    const { authenticated, profile, logout } = useAuth();
+
+    if (!authenticated) return <p>Loading...</p>;
+
     return (
         <div>
-            <Button size="lg">
-                <IconBrandReact/> New React App
-            </Button>
+            <h1>Welcome {profile?.username}</h1>
+            <button onClick={logout}>Logout</button>
+            <>{keycloak.token}</>
         </div>
-    )
+    );
 }

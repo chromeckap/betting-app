@@ -2,8 +2,10 @@ package com.chromeckap.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,6 +19,7 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -38,13 +41,21 @@ public class SecurityConfig {
                                         "/swagger-ui.html",
                                         "/ws/**")
                                 .permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest()
+                                .authenticated()
                         )
                 .oauth2ResourceServer(authorizeRequests ->
                         authorizeRequests.jwt(token ->
-                                token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())));
+                                token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())
+                        )
+                );
 
         return http.build();
+    }
+
+    @Bean
+    public AuditorAware<String> auditorAware() {
+        return new ApplicationAuditAware();
     }
 
     @Bean
