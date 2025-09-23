@@ -1,11 +1,11 @@
 package com.chromeckap.backend.group.membership;
 
 import com.chromeckap.backend.group.GroupRole;
-import com.chromeckap.backend.user.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,10 +28,11 @@ public class GroupMembershipController {
 
     @PostMapping("/{code}/join")
     public ResponseEntity<Void> joinGroupByCode(
-            @PathVariable final String code
+            @PathVariable final String code,
+            Authentication connectedUser
     ) {
         log.info("Joining group by code {}", code);
-        groupMembershipService.joinGroupByCode(code);
+        groupMembershipService.joinGroupByCode(code, connectedUser);
         return ResponseEntity.ok().build();
     }
 
@@ -39,20 +40,22 @@ public class GroupMembershipController {
     public ResponseEntity<Void> updateUserRoleInGroup(
             @PathVariable final Long groupId,
             @PathVariable final Long userId,
-            @Valid @RequestBody final GroupRole role
+            @Valid @RequestBody final GroupRole role,
+            Authentication connectedUser
             ) {
         log.info("Updating user with id {} in group with id {} with role {}", userId, groupId, role);
-        groupMembershipService.updateUserRoleInGroup(groupId, userId, role);
+        groupMembershipService.updateUserRoleInGroup(groupId, connectedUser, role);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{groupId}/users/{userId}")
     public ResponseEntity<Void> removeUserFromGroup(
             @PathVariable final Long groupId,
-            @PathVariable final Long userId
+            @PathVariable final Long userId,
+            Authentication connectedUser
     ) {
         log.info("Removing user with id {} from group with id {}", userId, groupId);
-        groupMembershipService.removeUserFromGroup(groupId, userId);
+        groupMembershipService.removeUserFromGroup(groupId, connectedUser);
         return ResponseEntity.noContent().build();
     }
 }

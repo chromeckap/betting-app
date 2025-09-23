@@ -7,6 +7,7 @@ import com.chromeckap.backend.group.membership.GroupMembershipValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,11 +45,11 @@ public class CategoryService {
      * @return list of {@link CategoryResponse}
      */
     @Transactional(readOnly = true)
-    public List<CategoryResponse> getCategoriesInGroup(final Long groupId) {
+    public List<CategoryResponse> getCategoriesInGroup(final Long groupId, Authentication connectedUser) {
         log.debug("Getting categories in group with id {}", groupId);
 
         Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupMember(group.getId());
+        groupMembershipValidator.requireUserIsGroupMember(group.getId(), connectedUser);
 
         List<CategoryResponse> responses = categoryRepository.findByGroupId(groupId).stream()
                 .map(categoryMapper::toResponse)
@@ -66,11 +67,11 @@ public class CategoryService {
      * @return id of created category
      */
     @Transactional
-    public Long createCategory(final Long groupId, @Valid final CategoryRequest request) {
+    public Long createCategory(final Long groupId, @Valid final CategoryRequest request, Authentication connectedUser) {
         log.debug("Creating category {} in group with id {}", request, groupId);
 
         Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupAdmin(group.getId());
+        groupMembershipValidator.requireUserIsGroupAdmin(group.getId(), connectedUser);
 
         Category category = categoryMapper.toEntity(request);
         category.setGroup(group);
@@ -90,11 +91,11 @@ public class CategoryService {
      * @return id of updated category
      */
     @Transactional
-    public Long updateCategory(final Long groupId, final Long id, @Valid final CategoryRequest request) {
+    public Long updateCategory(final Long groupId, final Long id, @Valid final CategoryRequest request, Authentication connectedUser) {
         log.debug("Updating category with id {} in group {} using {}", id, groupId, request);
 
         Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupAdmin(group.getId());
+        groupMembershipValidator.requireUserIsGroupAdmin(group.getId(), connectedUser);
 
         Category category = this.findCategoryByIdAndGroupId(id, groupId);
 
@@ -112,11 +113,11 @@ public class CategoryService {
      * @param id      category id
      */
     @Transactional
-    public void deleteCategory(final Long groupId, final Long id) {
+    public void deleteCategory(final Long groupId, final Long id, Authentication connectedUser) {
         log.debug("Deleting category with id {} from group {}", id, groupId);
 
         Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupAdmin(group.getId());
+        groupMembershipValidator.requireUserIsGroupAdmin(group.getId(), connectedUser);
 
         Category category = this.findCategoryByIdAndGroupId(id, groupId);
 
