@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
+@Setter(AccessLevel.PROTECTED)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 @Entity
 @Table(name = "bets")
-public class Bet extends AuditingEntity {
+public class Bet extends AuditingEntity<Bet> {
 
     //todo er-diagram has title, change attribute to name
     @Column(nullable = false)
@@ -50,5 +50,39 @@ public class Bet extends AuditingEntity {
     @OneToMany(mappedBy = "bet", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<BetOption> options = new ArrayList<>();
+
+    public Bet withName(String name) {
+        this.name = name;
+        return this;
+    }
+    public Bet withDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public Bet withDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
+        return this;
+    }
+
+    public Bet withCategory(Category category) {
+        this.category = category;
+        return this;
+    }
+
+    public Bet withCorrectOption(BetOption option) {
+        this.correctOption = option;
+        return this;
+    }
+
+    public Bet withStatus(BetStatus status) {
+        this.status = status;
+        return this;
+    }
+
+    public Bet withResolved(boolean isResolved) {
+        this.isResolved = isResolved;
+        return this;
+    }
 
 }

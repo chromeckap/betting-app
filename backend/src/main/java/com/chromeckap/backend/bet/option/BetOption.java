@@ -6,14 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@Setter
+@Setter(AccessLevel.PROTECTED)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
@@ -27,4 +24,13 @@ public class BetOption extends BaseEntity {
     @JoinColumn(name = "bet_id")
     private Bet bet;
 
+    public BetOption withName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public BetOption withBet(Bet bet) {
+        this.bet = bet;
+        return this;
+    }
 }

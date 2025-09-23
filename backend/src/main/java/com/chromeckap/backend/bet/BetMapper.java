@@ -29,10 +29,10 @@ public class BetMapper {
     }
 
     public Bet updateEntityAttributes(Bet bet, @Valid BetRequest request) {
-        bet.setName(request.name());
-        bet.setDescription(request.description());
-        bet.setDeadline(request.deadline());
-        return bet;
+        return bet
+                .withName(request.name())
+                .withDescription(request.description())
+                .withDeadline(request.deadline());
     }
 
 }

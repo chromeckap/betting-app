@@ -8,13 +8,13 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@Setter
+@Setter(AccessLevel.PROTECTED)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 @Entity
 @Table(name = "group_memberships")
-public class GroupMembership extends AuditingEntity {
+public class GroupMembership extends AuditingEntity<GroupMembership> {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
