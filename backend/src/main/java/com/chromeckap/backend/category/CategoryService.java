@@ -3,12 +3,11 @@ package com.chromeckap.backend.category;
 import com.chromeckap.backend.exception.CategoryNotFoundException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupService;
-import com.chromeckap.backend.group.membership.GroupMembershipValidator;
-import com.chromeckap.backend.utils.InviteCodeGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final GroupService groupService;
-    private final GroupMembershipValidator groupMembershipValidator;
 
     /**
      * Helper method for finding a category by id and group id.
@@ -46,11 +44,9 @@ public class CategoryService {
      * @return list of {@link CategoryResponse}
      */
     @Transactional(readOnly = true)
-    public List<CategoryResponse> getCategoriesInGroup(final Long groupId, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    public List<CategoryResponse> getCategoriesInGroup(final Long groupId) {
         log.debug("Getting categories in group with id {}", groupId);
-
-        Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupMember(group.getId(), connectedUser);
 
         List<CategoryResponse> responses = categoryRepository.findByGroupId(groupId).stream()
                 .map(categoryMapper::toResponse)
@@ -68,15 +64,14 @@ public class CategoryService {
      * @return id of created category
      */
     @Transactional
-    public Long createCategory(final Long groupId, @Valid final CategoryRequest request, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public Long createCategory(final Long groupId, @Valid final CategoryRequest request) {
         log.debug("Creating category {} in group with id {}", request, groupId);
 
         Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupAdmin(group.getId(), connectedUser);
-
         Category category = categoryMapper.toEntity(request)
                 .withGroup(group)
-                .withCreatedBy(connectedUser.getName());
+                .withCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Category savedCategory = categoryRepository.save(category);
         log.info("Successfully created category with id {} in group {}", savedCategory.getId(), groupId);
@@ -93,14 +88,11 @@ public class CategoryService {
      * @return id of updated category
      */
     @Transactional
-    public Long updateCategory(final Long groupId, final Long id, @Valid final CategoryRequest request, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public Long updateCategory(final Long groupId, final Long id, @Valid final CategoryRequest request) {
         log.debug("Updating category with id {} in group {} using {}", id, groupId, request);
 
-        Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupAdmin(group.getId(), connectedUser);
-
         Category category = this.findCategoryByIdAndGroupId(id, groupId);
-
         category = categoryMapper.updateEntityAttributes(category, request);
         Category savedCategory = categoryRepository.save(category);
 
@@ -115,15 +107,13 @@ public class CategoryService {
      * @param id      category id
      */
     @Transactional
-    public void deleteCategory(final Long groupId, final Long id, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public void deleteCategory(final Long groupId, final Long id) {
         log.debug("Deleting category with id {} from group {}", id, groupId);
 
-        Group group = groupService.findGroupById(groupId);
-        groupMembershipValidator.requireUserIsGroupAdmin(group.getId(), connectedUser);
-
         Category category = this.findCategoryByIdAndGroupId(id, groupId);
-
         categoryRepository.delete(category);
+
         log.info("Successfully deleted category with id {} from group {}", id, groupId);
     }
 }

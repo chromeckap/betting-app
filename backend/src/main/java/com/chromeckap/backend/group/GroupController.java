@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,11 +24,10 @@ public class GroupController {
 
     @PostMapping
     public ResponseEntity<Long> createGroup(
-            @Valid @RequestBody final GroupRequest request,
-            Authentication connectedUser
+            @Valid @RequestBody final GroupRequest request
     ) {
         log.info("Creating group {}", request);
-        Long response = groupService.createGroup(request, connectedUser);
+        Long response = groupService.createGroup(request);
         return ResponseEntity.ok(response);
     }
 

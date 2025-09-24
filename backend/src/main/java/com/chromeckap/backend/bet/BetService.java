@@ -5,11 +5,11 @@ import com.chromeckap.backend.bet.option.BetOptionService;
 import com.chromeckap.backend.category.Category;
 import com.chromeckap.backend.category.CategoryService;
 import com.chromeckap.backend.exception.BetNotFoundException;
-import com.chromeckap.backend.group.membership.GroupMembershipValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,6 @@ public class BetService {
     private final BetMapper betMapper;
     private final CategoryService categoryService;
     private final BetOptionService betOptionService;
-    private final GroupMembershipValidator groupMembershipValidator;
 
     /**
      * Helper method for finding a bet by id and category id.
@@ -49,10 +48,9 @@ public class BetService {
      * @return list of {@link BetResponse}
      */
     @Transactional(readOnly = true)
-    public List<BetResponse> getBetsInCategory(final Long groupId, final Long categoryId, Authentication connectedUser) { //todo replace list with page
+    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    public List<BetResponse> getBetsInCategory(final Long groupId, final Long categoryId) { //todo replace list with page
         log.debug("Getting bets in category with id {}", categoryId);
-
-        groupMembershipValidator.requireUserIsGroupMember(groupId, connectedUser);
 
         List<BetResponse> responses = betRepository.findByCategoryId(categoryId).stream()
                 .map(betMapper::toResponse)
@@ -71,10 +69,9 @@ public class BetService {
      * @return {@link BetResponse} for the found bet
      */
     @Transactional(readOnly = true)
-    public BetResponse getBetById(final Long groupId, final Long categoryId, final Long id, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    public BetResponse getBetById(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Getting bet with id {}", id);
-
-        groupMembershipValidator.requireUserIsGroupMember(groupId, connectedUser);
 
         Bet bet = betRepository.findBetByCategoryId(categoryId);
 
@@ -91,15 +88,14 @@ public class BetService {
      * @return id of created bet
      */
     @Transactional
-    public Long createBet(final Long groupId, final Long categoryId, @Valid final BetRequest request, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public Long createBet(final Long groupId, final Long categoryId, @Valid final BetRequest request) {
         log.debug("Creating bet {} in category with id {}", request, categoryId);
 
-        groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
         Category category = categoryService.findCategoryByIdAndGroupId(groupId, categoryId);
-
         Bet bet = betMapper.toEntity(request)
                 .withCategory(category)
-                .withCreatedBy(connectedUser.getName());
+                .withCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Bet savedBet = betRepository.save(bet);
         betOptionService.manageBetOptions(savedBet, request.options());
@@ -119,10 +115,9 @@ public class BetService {
      * @return id of updated bet
      */
     @Transactional
-    public Long updateBet(final Long groupId, final Long categoryId, final Long id, @Valid final BetRequest request,  Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public Long updateBet(final Long groupId, final Long categoryId, final Long id, @Valid final BetRequest request) {
         log.debug("Updating bet with id {} in category {} using {}", id, categoryId, request);
-
-        groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
 
         Bet bet = this.findBetByIdAndCategoryId(id, categoryId);
         bet = betMapper.updateEntityAttributes(bet, request);
@@ -143,10 +138,9 @@ public class BetService {
      * @param id         bet id
      */
     @Transactional
-    public void closeBet(final Long groupId, final Long categoryId, final Long id, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public void closeBet(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Closing bet {} in category with id {}", id, categoryId);
-
-        groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
 
         Bet bet = this.findBetByIdAndCategoryId(id, categoryId)
                 .withStatus(BetStatus.CLOSED);
@@ -163,10 +157,9 @@ public class BetService {
      * @param id         bet id
      */
     @Transactional
-    public void evaluateBet(final Long groupId, final Long categoryId, final Long id, final Long correctOptionId, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public void evaluateBet(final Long groupId, final Long categoryId, final Long id, final Long correctOptionId) {
         log.debug("Evaluating bet with id {} in category {}", id, categoryId);
-
-        groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
 
         BetOption correctOption = betOptionService.findBetOptionById(correctOptionId);
         Bet bet = this.findBetByIdAndCategoryId(id, categoryId)
@@ -186,13 +179,13 @@ public class BetService {
      * @param id         bet id
      */
     @Transactional
-    public void deleteBet(final Long groupId, final Long categoryId, final Long id, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public void deleteBet(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Deleting bet with id {} from category {}", id, categoryId);
-
-        groupMembershipValidator.requireUserIsGroupAdmin(groupId, connectedUser);
 
         Bet bet = this.findBetByIdAndCategoryId(id, categoryId);
         betRepository.delete(bet);
+
         log.info("Successfully deleted bet with id {} from category {}", id, categoryId);
     }
 }

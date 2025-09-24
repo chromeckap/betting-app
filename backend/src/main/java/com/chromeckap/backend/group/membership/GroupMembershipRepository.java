@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface GroupMembershipRepository extends JpaRepository<GroupMembership, Long> {
     boolean existsByGroupAndCreatedBy(Group group, String userId);
+    boolean existsByGroup_InviteCodeAndCreatedBy(String inviteCode, String userId);
     Optional<GroupMembership> findByGroupIdAndCreatedBy(Long groupId, String userId);
     List<GroupMembership> findByGroupId(Long groupId);
 }
