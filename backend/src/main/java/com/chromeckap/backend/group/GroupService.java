@@ -61,7 +61,7 @@ public class GroupService {
         log.debug("Creating group {}", request);
 
         Group group = groupMapper.toEntity(request)
-                .withInviteCode(InviteCodeGenerator.generate())
+                .withInviteCode(this.generateUniqueInviteCode())
                 .withCreatedBy(userId);
 
         Group savedGroup = groupRepository.save(group);
@@ -84,8 +84,8 @@ public class GroupService {
         log.debug("Updating group {} with id {}", request, id);
 
         Group group = this.findGroupById(id);
-        Group updatedGroup = groupMapper.updateEntityAttributes(group, request);
-        Group savedGroup = groupRepository.save(updatedGroup);
+        group = groupMapper.updateEntityAttributes(group, request);
+        Group savedGroup = groupRepository.save(group);
         log.info("Successfully updated group {} with id {}", request, savedGroup);
 
         return savedGroup.getId();
@@ -105,4 +105,14 @@ public class GroupService {
         groupRepository.delete(group);
         log.info("Successfully deleted group with id {}", id);
     }
+
+    private String generateUniqueInviteCode() {
+        String code;
+        do {
+            code = InviteCodeGenerator.generate();
+        } while (groupRepository.existsByInviteCode(code));
+
+        return code;
+    }
+
 }
