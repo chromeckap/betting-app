@@ -1,42 +1,53 @@
 package com.chromeckap.backend.group.membership;
 
-import com.chromeckap.backend.exception.UserHasNoAdminPermissionException;
-import com.chromeckap.backend.exception.UserIsMemberOfGroupException;
-import com.chromeckap.backend.exception.UserIsNotMemberOfGroupException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupRole;
 import com.chromeckap.backend.group.GroupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("unused") // used via Spring EL in @PreAuthorize
 public class GroupMembershipValidator {
     private final GroupService groupService;
     private final GroupMembershipRepository groupMembershipRepository;
 
-    public void requireUserIsGroupAdmin(Long groupId, Authentication connectedUser) {
+    private String getCurrentUserId() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    public boolean isGroupAdmin(Long groupId) {
+        String userId = this.getCurrentUserId();
         Group group = groupService.findGroupById(groupId);
 
-        groupMembershipRepository.findByGroupIdAndCreatedBy(group.getId(), connectedUser.getName())
+        return groupMembershipRepository.findByGroupIdAndCreatedBy(group.getId(), userId)
                 .filter(membership -> membership.getRole() == GroupRole.ADMIN)
-                .orElseThrow(UserHasNoAdminPermissionException::new);
+                .isPresent();
     }
 
-    public void requireUserIsGroupMember(Long groupId, Authentication connectedUser) {
+    public boolean isGroupMember(Long groupId) {
+        String userId = this.getCurrentUserId();
         Group group = groupService.findGroupById(groupId);
 
-        boolean isMember = groupMembershipRepository.existsByGroupAndCreatedBy(group, connectedUser.getName());
-        if (!isMember)
-            throw new UserIsNotMemberOfGroupException("User is not a member of this group.");
+        return groupMembershipRepository.existsByGroupAndCreatedBy(group, userId);
     }
 
-    public void requireUserNotGroupMember(Group group, Authentication connectedUser) {
-        boolean isMember = groupMembershipRepository.existsByGroupAndCreatedBy(group, connectedUser.getName());
-        if (isMember)
-            throw new UserIsMemberOfGroupException("User is a member of this group.");
+    public boolean isNotGroupMember(String inviteCode) {
+        String userId = this.getCurrentUserId();
+        return !groupMembershipRepository.existsByGroup_InviteCodeAndCreatedBy(inviteCode, userId);
+    }
+
+    public boolean canRemoveUserOrSelf(Long groupId, String targetUserId) {
+        String userId = this.getCurrentUserId();
+
+        if (userId.equals(targetUserId)) return true;
+
+        return groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
+                .filter(membership -> membership.getRole() == GroupRole.ADMIN)
+                .isPresent();
     }
 }

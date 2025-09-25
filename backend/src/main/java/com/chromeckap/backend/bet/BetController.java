@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,11 +18,10 @@ public class BetController {
     @GetMapping
     public ResponseEntity<List<BetResponse>> getBetsInCategory(
             @PathVariable final Long groupId,
-            @PathVariable final Long categoryId,
-            Authentication connectedUser
+            @PathVariable final Long categoryId
     ) {
         log.info("Fetching bets in category {} of group {}", categoryId, groupId);
-        List<BetResponse> responses = betService.getBetsInCategory(groupId, categoryId, connectedUser);
+        List<BetResponse> responses = betService.getBetsInCategory(groupId, categoryId);
         return ResponseEntity.ok(responses);
     }
 
@@ -31,11 +29,10 @@ public class BetController {
     public ResponseEntity<BetResponse> getBetById(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @PathVariable final Long id,
-            Authentication connectedUser
+            @PathVariable final Long id
     ) {
         log.info("Fetching bet {} in category {} of group {}", id, categoryId, groupId);
-        BetResponse response = betService.getBetById(groupId, categoryId, id, connectedUser);
+        BetResponse response = betService.getBetById(groupId, categoryId, id);
         return ResponseEntity.ok(response);
     }
 
@@ -43,11 +40,10 @@ public class BetController {
     public ResponseEntity<Long> createBet(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @Valid @RequestBody final BetRequest request,
-            Authentication connectedUser
+            @Valid @RequestBody final BetRequest request
     ) {
         log.info("Creating bet {} in category {} of group {}", request, categoryId, groupId);
-        Long response = betService.createBet(groupId, categoryId, request, connectedUser);
+        Long response = betService.createBet(groupId, categoryId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -56,11 +52,10 @@ public class BetController {
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
             @PathVariable final Long id,
-            @Valid @RequestBody final BetRequest request,
-            Authentication connectedUser
+            @Valid @RequestBody final BetRequest request
     ) {
         log.info("Updating bet {} in category {} of group {} with body {}", id, categoryId, groupId, request);
-        Long response = betService.updateBet(groupId, categoryId, id, request, connectedUser);
+        Long response = betService.updateBet(groupId, categoryId, id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -68,11 +63,10 @@ public class BetController {
     public ResponseEntity<Void> closeBet(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @PathVariable final Long id,
-            Authentication connectedUser
+            @PathVariable final Long id
     ) {
         log.info("Closing bet {} in category {} of group {}", id, categoryId, groupId);
-        betService.closeBet(groupId, categoryId, id, connectedUser);
+        betService.closeBet(groupId, categoryId, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -81,11 +75,10 @@ public class BetController {
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
             @PathVariable final Long id,
-            @PathVariable final Long correctOptionId,
-            Authentication connectedUser
+            @PathVariable final Long correctOptionId
     ) {
         log.info("Evaluating bet {} in category {} of group {}", id, categoryId, groupId);
-        betService.evaluateBet(groupId, categoryId, id, correctOptionId, connectedUser);
+        betService.evaluateBet(groupId, categoryId, id, correctOptionId);
         return ResponseEntity.noContent().build();
     }
 
@@ -93,11 +86,10 @@ public class BetController {
     public ResponseEntity<Void> deleteBet(
             @PathVariable final Long groupId,
             @PathVariable final Long categoryId,
-            @PathVariable final Long id,
-            Authentication connectedUser
+            @PathVariable final Long id
     ) {
         log.info("Deleting bet {} in category {} of group {}", id, categoryId, groupId);
-        betService.deleteBet(groupId, categoryId, id, connectedUser);
+        betService.deleteBet(groupId, categoryId, id);
         return ResponseEntity.noContent().build();
     }
 }

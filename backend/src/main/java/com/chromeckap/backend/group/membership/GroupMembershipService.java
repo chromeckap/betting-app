@@ -1,6 +1,5 @@
 package com.chromeckap.backend.group.membership;
 
-import com.chromeckap.backend.common.AuditingEntity;
 import com.chromeckap.backend.exception.GroupNotFoundException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupRepository;
@@ -8,7 +7,8 @@ import com.chromeckap.backend.group.GroupRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +21,6 @@ public class GroupMembershipService {
     private final GroupMembershipRepository groupMembershipRepository;
     private final GroupRepository groupRepository;
     private final GroupMembershipMapper groupMembershipMapper;
-    private final GroupMembershipValidator groupMembershipValidator;
 
     /**
      * Retrieve a list of usernames in a group.
@@ -30,6 +29,7 @@ public class GroupMembershipService {
      * @return list of usernames
      */
     @Transactional(readOnly = true)
+    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
     public List<String> getUsersInGroup(final Long groupId) {
         log.debug("Fetching users in group with id {}", groupId);
 
@@ -45,42 +45,39 @@ public class GroupMembershipService {
      * @param code the invite code
      */
     @Transactional
-    public void joinGroupByCode(final String code, Authentication connectedUser) {
+    @PreAuthorize("@groupMembershipValidator.isNotGroupMember(#code)")
+    public void joinGroupByCode(final String code) {
         log.debug("User attempting to join group with code {}", code);
 
         Group group = groupRepository.findByInviteCodeEquals(code)
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        groupMembershipValidator.requireUserNotGroupMember(group, connectedUser);
-
         GroupMembership membership = groupMembershipMapper.toEntity(group)
-                .withCreatedBy(connectedUser.getName());
+                .withCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
 
         groupMembershipRepository.save(membership);
 
-        log.info("User {} joined group {}", connectedUser.getName(), group.getId());
+        log.info("User {} joined group {}", SecurityContextHolder.getContext().getAuthentication().getName(), group.getId());
     }
 
     /**
      * Update a user's role in a group.
      *
      * @param groupId the group id
-     * @param connectedUser  the connected user
      * @param role    the new role
      */
     @Transactional
-    public void updateUserRoleInGroup(final Long groupId, final Authentication connectedUser, @Valid final GroupRole role) {
-        log.debug("Updating role for user {} in group {} to {}", connectedUser.getName(), groupId, role);
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    public void updateUserRoleInGroup(final Long groupId, final String userId, @Valid final GroupRole role) {
+        log.debug("Updating role for user {} in group {} to {}", userId, groupId, role);
 
-        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, connectedUser.getName())
+        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
-
-        groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId(), connectedUser);
 
         membership.setRole(role);
         groupMembershipRepository.save(membership);
 
-        log.info("Updated role for user {} in group {} to {}", connectedUser.getName(), groupId, role);
+        log.info("Updated role for user {} in group {} to {}", userId, groupId, role);
     }
 
     /**
@@ -88,21 +85,16 @@ public class GroupMembershipService {
      *
      * @param groupId the group id
      * @param userId the id of the user to be deleted
-     * @param connectedUser  the connected user
      */
     @Transactional
-    public void removeUserFromGroup(final Long groupId, final String userId, final Authentication connectedUser) {
-        log.debug("Removing user {} from group {}", connectedUser.getName(), groupId);
+    @PreAuthorize("@groupMembershipValidator.canRemoveUserOrSelf(#groupId, #userId)")
+    public void removeUserFromGroup(final Long groupId, final String userId) {
+        log.debug("Removing user {} from group {}", userId, groupId);
 
-        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, connectedUser.getName())
+        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
                 .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
 
-        boolean isSelfRemoving = connectedUser.getName().equals(userId);
-        if (!isSelfRemoving) {
-            groupMembershipValidator.requireUserIsGroupAdmin(membership.getGroup().getId(), connectedUser);
-        }
-
         groupMembershipRepository.delete(membership);
-        log.info("User {} removed from group {}", connectedUser.getName(), groupId);
+        log.info("User {} removed from group {}", userId, groupId);
     }
 }

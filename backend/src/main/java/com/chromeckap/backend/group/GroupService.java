@@ -5,7 +5,8 @@ import com.chromeckap.backend.utils.InviteCodeGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupMapper groupMapper;
-    private final GroupValidator groupValidator;
-
-    //todo add permissions needed to execute methods
 
     /**
      * Helper method for finding a group by id.
@@ -41,6 +39,7 @@ public class GroupService {
      * @return mapped {@link GroupResponse}
      */
     @Transactional(readOnly = true)
+    @PreAuthorize("@groupMembershipValidator.isGroupMember(#id)")
     public GroupResponse getGroupById(final Long id) {
         log.debug("Getting group with id {}", id);
 
@@ -55,12 +54,12 @@ public class GroupService {
      * @return the id of the newly created group
      */
     @Transactional
-    public Long createGroup(@Valid final GroupRequest request, Authentication connectedUser) {
+    public Long createGroup(@Valid final GroupRequest request) {
         log.debug("Creating group {}", request);
 
         Group group = groupMapper.toEntity(request)
                 .withInviteCode(InviteCodeGenerator.generate())
-                .withCreatedBy(connectedUser.getName());
+                .withCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Group savedGroup = groupRepository.save(group);
         log.info("Successfully created group {}", savedGroup);
@@ -76,6 +75,7 @@ public class GroupService {
      * @return the id of the updated group
      */
     @Transactional
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#id)")
     public Long updateGroup(final Long id, @Valid final GroupRequest request) {
         log.debug("Updating group {} with id {}", request, id);
 
@@ -93,6 +93,7 @@ public class GroupService {
      * @param id the id of the group to delete
      */
     @Transactional
+    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#id)")
     public void deleteGroup(final Long id) {
         log.debug("Deleting group with id {}", id);
 
