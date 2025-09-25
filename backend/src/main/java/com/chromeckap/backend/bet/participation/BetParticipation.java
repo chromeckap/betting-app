@@ -25,4 +25,8 @@ public class BetParticipation extends AuditingEntity<BetParticipation> {
     @JoinColumn(name = "selected_option_id", nullable = false)
     private BetOption selectedOption;
 
+    public BetParticipation withSelectedOption(BetOption selectedOption) {
+        this.selectedOption = selectedOption;
+        return this;
+    }
 }
