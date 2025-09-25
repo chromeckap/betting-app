@@ -1,53 +1,60 @@
 package com.chromeckap.backend.group.membership;
 
-import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupRole;
-import com.chromeckap.backend.group.GroupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("unused") // used via Spring EL in @PreAuthorize
 public class GroupMembershipValidator {
-    private final GroupService groupService;
-    private final GroupMembershipRepository groupMembershipRepository;
+    private final GroupMembershipRepository repository;
 
-    private String getCurrentUserId() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+    public void validateUserRemoval(Long groupId, String userId) {
+        List<GroupMembership> members = repository.findByGroupId(groupId);
+
+        if (this.isLastMember(members, userId))
+            throw new IllegalArgumentException("Last player of the group cannot be removed, delete the group instead.");
+
+        if (this.isLastAdmin(members, userId))
+            throw new IllegalArgumentException("Cannot remove the last admin. Promote another member first.");
+
+        log.debug("User {} can be removed from group {}", userId, groupId);
     }
 
-    public boolean isGroupAdmin(Long groupId) {
-        String userId = this.getCurrentUserId();
-        Group group = groupService.findGroupById(groupId);
+    public void validateRoleChange(Long groupId, String userId, GroupRole newRole) {
+        if (newRole == GroupRole.ADMIN) return;
+        List<GroupMembership> members = repository.findByGroupId(groupId);
 
-        return groupMembershipRepository.findByGroupIdAndCreatedBy(group.getId(), userId)
-                .filter(membership -> membership.getRole() == GroupRole.ADMIN)
-                .isPresent();
+        if (this.isLastAdmin(members, userId))
+            throw new IllegalArgumentException("Cannot demote the last admin. Promote another member first.");
     }
 
-    public boolean isGroupMember(Long groupId) {
-        String userId = this.getCurrentUserId();
-        Group group = groupService.findGroupById(groupId);
-
-        return groupMembershipRepository.existsByGroupAndCreatedBy(group, userId);
+    private boolean isLastMember(List<GroupMembership> members, String userId) {
+        return members.size() == 1 && members.getFirst().getCreatedBy().equals(userId);
     }
 
-    public boolean isNotGroupMember(String inviteCode) {
-        String userId = this.getCurrentUserId();
-        return !groupMembershipRepository.existsByGroup_InviteCodeAndCreatedBy(inviteCode, userId);
+    private boolean isLastAdmin(List<GroupMembership> members, String userId) {
+        GroupMembership membership = this.getMembership(members, userId);
+        return membership != null
+                && membership.getRole() == GroupRole.ADMIN
+                && this.countAdmins(members) == 1;
     }
 
-    public boolean canRemoveUserOrSelf(Long groupId, String targetUserId) {
-        String userId = this.getCurrentUserId();
+    private GroupMembership getMembership(List<GroupMembership> members, String userId) {
+        return members.stream()
+                .filter(m -> m.getCreatedBy().equals(userId))
+                .findFirst()
+                .orElse(null);
+    }
 
-        if (userId.equals(targetUserId)) return true;
-
-        return groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
-                .filter(membership -> membership.getRole() == GroupRole.ADMIN)
-                .isPresent();
+    private long countAdmins(List<GroupMembership> members) {
+        return members.stream()
+                .filter(m -> m.getRole() == GroupRole.ADMIN)
+                .count();
     }
 }
