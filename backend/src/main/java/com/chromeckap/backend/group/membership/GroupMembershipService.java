@@ -21,6 +21,7 @@ public class GroupMembershipService {
     private final GroupMembershipRepository groupMembershipRepository;
     private final GroupRepository groupRepository;
     private final GroupMembershipMapper groupMembershipMapper;
+    private final GroupMembershipValidator groupMembershipValidator;
 
     public GroupMembership findGroupMembershipByGroupIdAndCreatedBy(Long groupId, String userId) {
         return groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
@@ -34,7 +35,7 @@ public class GroupMembershipService {
      * @return list of usernames
      */
     @Transactional(readOnly = true)
-    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public List<String> getUsersInGroup(final Long groupId) {
         log.debug("Fetching users in group with id {}", groupId);
 
@@ -50,7 +51,7 @@ public class GroupMembershipService {
      * @param code the invite code
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isNotGroupMember(#code)")
+    @PreAuthorize("@groupMembershipPermission.isNotGroupMember(#code)")
     public void joinGroupByCode(final String code) {
         log.debug("User attempting to join group with code {}", code);
 
@@ -72,9 +73,11 @@ public class GroupMembershipService {
      * @param role    the new role
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public void updateUserRoleInGroup(final Long groupId, final String userId, @Valid final GroupRole role) {
         log.debug("Updating role for user {} in group {} to {}", userId, groupId, role);
+
+        groupMembershipValidator.validateRoleChange(groupId, userId, role);
 
         GroupMembership membership = this.findGroupMembershipByGroupIdAndCreatedBy(groupId, userId)
                 .withRole(role);
@@ -90,9 +93,11 @@ public class GroupMembershipService {
      * @param userId the id of the user to be deleted
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.canRemoveUserOrSelf(#groupId, #userId)")
+    @PreAuthorize("@groupMembershipPermission.canRemoveUserOrSelf(#groupId, #userId)")
     public void removeUserFromGroup(final Long groupId, final String userId) {
         log.debug("Removing user {} from group {}", userId, groupId);
+
+        groupMembershipValidator.validateUserRemoval(groupId, userId);
 
         GroupMembership membership = this.findGroupMembershipByGroupIdAndCreatedBy(groupId, userId);
         groupMembershipRepository.delete(membership);

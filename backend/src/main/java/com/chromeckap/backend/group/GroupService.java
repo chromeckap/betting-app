@@ -41,7 +41,7 @@ public class GroupService {
      * @return mapped {@link GroupResponse}
      */
     @Transactional(readOnly = true)
-    @PreAuthorize("@groupMembershipValidator.isGroupMember(#id)")
+    @PreAuthorize("@groupMembershipPermission.isGroupMember(#id)")
     public GroupResponse getGroupById(final Long id) {
         log.debug("Getting group with id {}", id);
 
@@ -79,7 +79,7 @@ public class GroupService {
      * @return the id of the updated group
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#id)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#id)")
     public Long updateGroup(final Long id, @Valid final GroupRequest request) {
         log.debug("Updating group {} with id {}", request, id);
 
@@ -97,7 +97,7 @@ public class GroupService {
      * @param id the id of the group to delete
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#id)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#id)")
     public void deleteGroup(final Long id) {
         log.debug("Deleting group with id {}", id);
 

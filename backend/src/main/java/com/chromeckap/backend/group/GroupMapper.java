@@ -11,7 +11,6 @@ public class GroupMapper {
     public Group toEntity(@Valid GroupRequest request) {
         return Group.builder()
                 .name(request.name())
-                .inviteCode(request.inviteCode())
                 .build();
     }
 
@@ -24,7 +23,6 @@ public class GroupMapper {
 
     public Group updateEntityAttributes(Group group, @Valid GroupRequest request) {
         return group
-                .withName(request.name())
-                .withInviteCode(request.inviteCode());
+                .withName(request.name());
     }
 }
