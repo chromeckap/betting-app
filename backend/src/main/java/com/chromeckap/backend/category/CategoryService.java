@@ -44,7 +44,7 @@ public class CategoryService {
      * @return list of {@link CategoryResponse}
      */
     @Transactional(readOnly = true)
-    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public List<CategoryResponse> getCategoriesInGroup(final Long groupId) {
         log.debug("Getting categories in group with id {}", groupId);
 
@@ -64,7 +64,7 @@ public class CategoryService {
      * @return id of created category
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public Long createCategory(final Long groupId, @Valid final CategoryRequest request) {
         log.debug("Creating category {} in group with id {}", request, groupId);
 
@@ -88,7 +88,7 @@ public class CategoryService {
      * @return id of updated category
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public Long updateCategory(final Long groupId, final Long id, @Valid final CategoryRequest request) {
         log.debug("Updating category with id {} in group {} using {}", id, groupId, request);
 
@@ -107,7 +107,7 @@ public class CategoryService {
      * @param id      category id
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public void deleteCategory(final Long groupId, final Long id) {
         log.debug("Deleting category with id {} from group {}", id, groupId);
 

@@ -42,7 +42,7 @@ public class BetParticipationService {
      * @throws IllegalArgumentException if the selected option does not belong to the given bet
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public Long participateInBet(final Long groupId, final Long categoryId,final Long betId, @Valid final BetParticipationRequest request) {
         log.debug("User participating in bet with id {} in category {} and group {}", betId, categoryId, groupId);
 
@@ -80,7 +80,7 @@ public class BetParticipationService {
      * @throws IllegalArgumentException if the user has no participation in the bet
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public void cancelParticipationInBet(final Long groupId, final Long categoryId, final Long betId) {
         String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("User={} requests cancellation of participation in bet={} in group {}", currentUserId, betId, groupId);

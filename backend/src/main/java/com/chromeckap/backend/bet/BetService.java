@@ -48,7 +48,7 @@ public class BetService {
      * @return list of {@link BetResponse}
      */
     @Transactional(readOnly = true)
-    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public List<BetResponse> getBetsInCategory(final Long groupId, final Long categoryId) { //todo replace list with page
         log.debug("Getting bets in category with id {}", categoryId);
 
@@ -69,7 +69,7 @@ public class BetService {
      * @return {@link BetResponse} for the found bet
      */
     @Transactional(readOnly = true)
-    @PreAuthorize("@groupMembershipValidator.isGroupMember(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public BetResponse getBetById(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Getting bet with id {}", id);
 
@@ -88,7 +88,7 @@ public class BetService {
      * @return id of created bet
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public Long createBet(final Long groupId, final Long categoryId, @Valid final BetRequest request) {
         log.debug("Creating bet {} in category with id {}", request, categoryId);
 
@@ -115,7 +115,7 @@ public class BetService {
      * @return id of updated bet
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public Long updateBet(final Long groupId, final Long categoryId, final Long id, @Valid final BetRequest request) {
         log.debug("Updating bet with id {} in category {} using {}", id, categoryId, request);
 
@@ -138,7 +138,7 @@ public class BetService {
      * @param id         bet id
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public void closeBet(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Closing bet {} in category with id {}", id, categoryId);
 
@@ -157,7 +157,7 @@ public class BetService {
      * @param id         bet id
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public void evaluateBet(final Long groupId, final Long categoryId, final Long id, final Long correctOptionId) {
         log.debug("Evaluating bet with id {} in category {}", id, categoryId);
 
@@ -179,7 +179,7 @@ public class BetService {
      * @param id         bet id
      */
     @Transactional
-    @PreAuthorize("@groupMembershipValidator.isGroupAdmin(#groupId)")
+    @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
     public void deleteBet(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Deleting bet with id {} from category {}", id, categoryId);
 
