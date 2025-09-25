@@ -24,4 +24,8 @@ public class GroupMembership extends AuditingEntity<GroupMembership> {
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
+    public GroupMembership withRole(GroupRole role) {
+        this.role = role;
+        return this;
+    }
 }

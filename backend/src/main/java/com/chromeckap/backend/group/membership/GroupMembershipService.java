@@ -22,6 +22,11 @@ public class GroupMembershipService {
     private final GroupRepository groupRepository;
     private final GroupMembershipMapper groupMembershipMapper;
 
+    public GroupMembership findGroupMembershipByGroupIdAndCreatedBy(Long groupId, String userId) {
+        return groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
+                .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
+    }
+
     /**
      * Retrieve a list of usernames in a group.
      *
@@ -71,10 +76,8 @@ public class GroupMembershipService {
     public void updateUserRoleInGroup(final Long groupId, final String userId, @Valid final GroupRole role) {
         log.debug("Updating role for user {} in group {} to {}", userId, groupId, role);
 
-        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
-                .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
-
-        membership.setRole(role);
+        GroupMembership membership = this.findGroupMembershipByGroupIdAndCreatedBy(groupId, userId)
+                .withRole(role);
         groupMembershipRepository.save(membership);
 
         log.info("Updated role for user {} in group {} to {}", userId, groupId, role);
@@ -91,10 +94,29 @@ public class GroupMembershipService {
     public void removeUserFromGroup(final Long groupId, final String userId) {
         log.debug("Removing user {} from group {}", userId, groupId);
 
-        GroupMembership membership = groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
-                .orElseThrow(() -> new GroupNotFoundException("Group was not found."));
-
+        GroupMembership membership = this.findGroupMembershipByGroupIdAndCreatedBy(groupId, userId);
         groupMembershipRepository.delete(membership);
+
         log.info("User {} removed from group {}", userId, groupId);
+    }
+
+    /**
+     * Assigns the ADMIN role to the creator of a group.
+     * <p>
+     * This method is intended to be called after a new group has been created.
+     * It creates a new {@link GroupMembership} for the given user and group,
+     * sets the role to {@link GroupRole#ADMIN}, and persists it in the repository.
+     *
+     * @param group  the group for which the membership should be created
+     * @param userId the ID of the user to be assigned as ADMIN
+     */
+    @Transactional
+    public void createInitialAdminMembership(Group group, String userId) {
+        GroupMembership membership = groupMembershipMapper.toEntity(group)
+                .withRole(GroupRole.ADMIN)
+                .withCreatedBy(userId);
+
+        groupMembershipRepository.save(membership);
+        log.info("Successfully assigned ADMIN role to user {} for group {}", userId, group.getId());
     }
 }

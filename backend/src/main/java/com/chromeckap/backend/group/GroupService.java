@@ -1,6 +1,7 @@
 package com.chromeckap.backend.group;
 
 import com.chromeckap.backend.exception.GroupNotFoundException;
+import com.chromeckap.backend.group.membership.GroupMembershipService;
 import com.chromeckap.backend.utils.InviteCodeGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupMapper groupMapper;
+    private final GroupMembershipService groupMembershipService;
 
     /**
      * Helper method for finding a group by id.
@@ -55,13 +57,15 @@ public class GroupService {
      */
     @Transactional
     public Long createGroup(@Valid final GroupRequest request) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Creating group {}", request);
 
         Group group = groupMapper.toEntity(request)
                 .withInviteCode(InviteCodeGenerator.generate())
-                .withCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+                .withCreatedBy(userId);
 
         Group savedGroup = groupRepository.save(group);
+        groupMembershipService.createInitialAdminMembership(group, userId);
         log.info("Successfully created group {}", savedGroup);
 
         return savedGroup.getId();
