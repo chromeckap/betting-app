@@ -3,7 +3,6 @@ package com.chromeckap.backend.group;
 import com.chromeckap.backend.exception.GroupNotFoundException;
 import com.chromeckap.backend.group.membership.GroupMembershipService;
 import com.chromeckap.backend.utils.InviteCodeGenerator;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,16 +28,16 @@ public class GroupService {
     @Transactional(readOnly = true)
     public Group findGroupById(final Long id) {
         return groupRepository.findById(id)
-                .orElseThrow(() -> new GroupNotFoundException(
-                        String.format("Group with id %s was not found.", id)
-                ));
+                .orElseThrow(GroupNotFoundException::new);
     }
 
     /**
      * Retrieve a single group by its id.
+     * Requires the current user to be a member of the group.
      *
      * @param id the unique identifier of the group
      * @return mapped {@link GroupResponse}
+     * @throws GroupNotFoundException if no group with given id exists
      */
     @Transactional(readOnly = true)
     @PreAuthorize("@groupMembershipPermission.isGroupMember(#id)")
@@ -51,12 +50,13 @@ public class GroupService {
 
     /**
      * Create a new group based on a request payload.
+     * The authenticated user will be set as the creator and assigned ADMIN role.
      *
      * @param request validated {@link GroupRequest}
      * @return the id of the newly created group
      */
     @Transactional
-    public Long createGroup(@Valid final GroupRequest request) {
+    public Long createGroup(final GroupRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Creating group {}", request);
 
@@ -65,7 +65,7 @@ public class GroupService {
                 .withCreatedBy(userId);
 
         Group savedGroup = groupRepository.save(group);
-        groupMembershipService.createInitialAdminMembership(group, userId);
+        groupMembershipService.createInitialAdminMembership(savedGroup, userId);
         log.info("Successfully created group {}", savedGroup);
 
         return savedGroup.getId();
@@ -73,28 +73,32 @@ public class GroupService {
 
     /**
      * Update attributes of an existing group.
+     * Only accessible to group admins.
      *
      * @param id      the id of the group to update
      * @param request validated {@link GroupRequest} with new values
      * @return the id of the updated group
+     * @throws GroupNotFoundException if the group does not exist
      */
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#id)")
-    public Long updateGroup(final Long id, @Valid final GroupRequest request) {
+    public Long updateGroup(final Long id, final GroupRequest request) {
         log.debug("Updating group {} with id {}", request, id);
 
         Group group = this.findGroupById(id);
         group = groupMapper.updateEntityAttributes(group, request);
         Group savedGroup = groupRepository.save(group);
-        log.info("Successfully updated group {} with id {}", request, savedGroup);
+        log.info("Successfully updated group {} with id {}", savedGroup, savedGroup.getId());
 
         return savedGroup.getId();
     }
 
     /**
      * Delete a group by its id.
+     * Only accessible to group admins.
      *
      * @param id the id of the group to delete
+     * @throws GroupNotFoundException if the group does not exist
      */
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#id)")

@@ -2,6 +2,7 @@ package com.chromeckap.backend.group;
 
 import com.chromeckap.backend.category.Category;
 import com.chromeckap.backend.common.AuditingEntity;
+import com.chromeckap.backend.group.membership.GroupMembership;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -27,6 +28,10 @@ public class Group extends AuditingEntity<Group> {
     @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Category> categories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    private List<GroupMembership> memberships = new ArrayList<>();
 
     public Group withName(String name) {
         this.name = name;
