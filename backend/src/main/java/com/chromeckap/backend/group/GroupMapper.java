@@ -1,6 +1,5 @@
 package com.chromeckap.backend.group;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class GroupMapper {
 
-    public Group toEntity(@Valid GroupRequest request) {
+    public Group toEntity( GroupRequest request) {
         return Group.builder()
                 .name(request.name())
                 .build();
@@ -21,7 +20,7 @@ public class GroupMapper {
                 .build();
     }
 
-    public Group updateEntityAttributes(Group group, @Valid GroupRequest request) {
+    public Group updateEntityAttributes(Group group, GroupRequest request) {
         return group
                 .withName(request.name());
     }
