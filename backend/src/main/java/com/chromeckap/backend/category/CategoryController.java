@@ -1,9 +1,11 @@
 package com.chromeckap.backend.category;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,12 +14,13 @@ import java.util.List;
 @RequestMapping("/api/v1/groups/{groupId}/categories")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getCategoriesInGroup(
-            @PathVariable final Long groupId
+            @PathVariable @NotNull(message = "{group.id.required}") final Long groupId
     ) {
         log.info("Fetching categories in group with id {}", groupId);
         List<CategoryResponse> response = categoryService.getCategoriesInGroup(groupId);
@@ -26,7 +29,7 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<Long> createCategory(
-            @PathVariable final Long groupId,
+            @PathVariable @NotNull(message = "{group.id.required}") final Long groupId,
             @Valid @RequestBody final CategoryRequest request
     ) {
         log.info("Creating category {} for group with id {}", request, groupId);
@@ -36,8 +39,8 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateCategory(
-            @PathVariable final Long groupId,
-            @PathVariable final Long id,
+            @PathVariable @NotNull(message = "{group.id.required}") final Long groupId,
+            @PathVariable @NotNull(message = "{category.id.required}") final Long id,
             @Valid @RequestBody final CategoryRequest request
     ) {
         log.info("Updating category with id {} with body {}", id, request);
@@ -47,8 +50,8 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(
-            @PathVariable final Long groupId,
-            @PathVariable final Long id
+            @PathVariable @NotNull(message = "{group.id.required}") final Long groupId,
+            @PathVariable @NotNull(message = "{category.id.required}") final Long id
     ) {
         log.info("Deleting category with id {}", id);
         categoryService.deleteCategory(groupId, id);
