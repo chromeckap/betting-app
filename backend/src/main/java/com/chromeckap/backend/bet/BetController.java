@@ -4,11 +4,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/groups/{groupId}/categories/{categoryId}/bets")
@@ -19,13 +21,14 @@ public class BetController {
     private final BetService betService;
 
     @GetMapping
-    public ResponseEntity<List<BetResponse>> getBetsInCategory(
+    public ResponseEntity<Page<BetResponse>> getBetsInCategory(
             @PathVariable @NotNull(message = "{group.id.required}") final Long groupId,
-            @PathVariable @NotNull(message = "{category.id.required}") final Long categoryId
+            @PathVariable @NotNull(message = "{category.id.required}") final Long categoryId,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         log.info("Fetching bets in category {} of group {}", categoryId, groupId);
-        List<BetResponse> responses = betService.getBetsInCategory(groupId, categoryId);
-        return ResponseEntity.ok(responses);
+        Page<BetResponse> responsePage = betService.getBetsInCategory(groupId, categoryId, pageable);
+        return ResponseEntity.ok(responsePage);
     }
 
     @GetMapping("/{id}")
