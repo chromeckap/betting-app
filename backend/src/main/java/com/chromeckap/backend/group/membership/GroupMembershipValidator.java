@@ -20,10 +20,10 @@ public class GroupMembershipValidator {
         List<GroupMembership> members = repository.findAllByGroupId(groupId);
 
         if (this.isLastMember(members, userId))
-            throw new LastMemberRemovalException();
+            throw new LastMemberRemovalException(groupId, userId);
 
         if (this.isLastAdmin(members, userId))
-            throw new LastAdminRemovalException();
+            throw new LastAdminRemovalException(groupId, userId);
 
         log.debug("User {} can be removed from group {}", userId, groupId);
     }
@@ -33,7 +33,7 @@ public class GroupMembershipValidator {
         List<GroupMembership> members = repository.findAllByGroupId(groupId);
 
         if (this.isLastAdmin(members, userId))
-            throw new LastAdminDemotionException();
+            throw new LastAdminDemotionException(groupId, userId);
     }
 
     private boolean isLastMember(List<GroupMembership> members, String userId) {

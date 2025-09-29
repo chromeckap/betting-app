@@ -1,11 +1,11 @@
 package com.chromeckap.backend.exception;
 
-public class LastAdminRemovalException extends RuntimeException {
-    public LastAdminRemovalException(String message) {
-        super(message);
-    }
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public LastAdminRemovalException() {
-        super("Cannot remove the last admin. Promote another member first");
-    }
+@Getter
+@AllArgsConstructor
+public class LastAdminRemovalException extends RuntimeException {
+    private final Long groupId;
+    private final String userId;
 }

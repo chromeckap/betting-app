@@ -1,11 +1,11 @@
 package com.chromeckap.backend.exception;
 
-public class GroupMembershipNotFoundException extends RuntimeException {
-    public GroupMembershipNotFoundException(String message) {
-        super(message);
-    }
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public GroupMembershipNotFoundException() {
-        super("No membership in group");
-    }
+@Getter
+@AllArgsConstructor
+public class GroupMembershipNotFoundException extends RuntimeException {
+    private final Long groupId;
+    private final String userId;
 }

@@ -2,6 +2,7 @@ package com.chromeckap.backend.bet.option;
 
 import com.chromeckap.backend.bet.Bet;
 import com.chromeckap.backend.exception.BetNotFoundException;
+import com.chromeckap.backend.exception.BetOptionNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,7 @@ public class BetOptionService {
     @Transactional(readOnly = true)
     public BetOption findOptionByIdAndBet(Long optionId, Bet bet) {
         return betOptionRepository.findByIdAndBet(optionId, bet)
-                .orElseThrow(() -> new BetNotFoundException(
-                        "Bet option with id %s was not found."
-                                .formatted(optionId)
-                ));
+                .orElseThrow(() -> new BetOptionNotFoundException(optionId));
     }
 
     @Transactional
@@ -122,11 +120,9 @@ public class BetOptionService {
                 .filter(r -> r.id() != null)
                 .map(r -> {
                     BetOption existing = existingMap.get(r.id());
-                    if (existing == null) {
-                        throw new BetNotFoundException(
-                                "Bet option with id %s not found for bet %s"
-                                        .formatted(r.id(), bet.getId()));
-                    }
+                    if (existing == null)
+                        throw new BetOptionNotFoundException(r.id());
+
                     return betOptionMapper.updateEntityAttributes(existing, r);
                 })
                 .toList();

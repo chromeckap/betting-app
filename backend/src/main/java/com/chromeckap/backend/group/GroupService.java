@@ -28,7 +28,7 @@ public class GroupService {
     @Transactional(readOnly = true)
     public Group findGroupById(final Long id) {
         return groupRepository.findById(id)
-                .orElseThrow(GroupNotFoundException::new);
+                .orElseThrow(() -> new GroupNotFoundException(id));
     }
 
     /**

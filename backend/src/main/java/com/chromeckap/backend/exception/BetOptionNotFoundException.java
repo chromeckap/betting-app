@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CategoryNotFoundException extends RuntimeException {
-    private final Long categoryId;
+public class BetOptionNotFoundException extends RuntimeException {
+    private final Long optionId;
 }

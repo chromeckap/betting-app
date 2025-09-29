@@ -1,11 +1,11 @@
 package com.chromeckap.backend.exception;
 
-public class LastMemberRemovalException extends RuntimeException {
-    public LastMemberRemovalException(String message) {
-        super(message);
-    }
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public LastMemberRemovalException() {
-        super("Last player of the group cannot be removed, delete the group instead");
-    }
+@Getter
+@AllArgsConstructor
+public class LastMemberRemovalException extends RuntimeException {
+    private final Long groupId;
+    private final String userId;
 }
