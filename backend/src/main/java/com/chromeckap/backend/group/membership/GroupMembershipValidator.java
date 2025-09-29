@@ -17,7 +17,7 @@ public class GroupMembershipValidator {
     private final GroupMembershipRepository repository;
 
     public void validateUserRemoval(Long groupId, String userId) {
-        List<GroupMembership> members = repository.findByGroupId(groupId);
+        List<GroupMembership> members = repository.findAllByGroupId(groupId);
 
         if (this.isLastMember(members, userId))
             throw new LastMemberRemovalException();
@@ -30,7 +30,7 @@ public class GroupMembershipValidator {
 
     public void validateRoleChange(Long groupId, String userId, GroupRole newRole) {
         if (newRole == GroupRole.ADMIN) return;
-        List<GroupMembership> members = repository.findByGroupId(groupId);
+        List<GroupMembership> members = repository.findAllByGroupId(groupId);
 
         if (this.isLastAdmin(members, userId))
             throw new LastAdminDemotionException();

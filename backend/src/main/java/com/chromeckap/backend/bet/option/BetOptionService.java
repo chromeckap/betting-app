@@ -49,7 +49,7 @@ public class BetOptionService {
     private void manageYesNoOptions(Bet bet) {
         log.debug("Managing YES_NO options for bet {}", bet.getId());
 
-        List<BetOption> existingOptions = betOptionRepository.findByBet(bet);
+        List<BetOption> existingOptions = betOptionRepository.findAllByBet(bet);
 
         boolean hasYes = existingOptions.stream()
                 .anyMatch(opt -> YES.equalsIgnoreCase(opt.getName()));
@@ -92,7 +92,7 @@ public class BetOptionService {
             return;
         }
 
-        List<BetOption> existing = betOptionRepository.findByBet(bet);
+        List<BetOption> existing = betOptionRepository.findAllByBet(bet);
         Map<Long, BetOption> existingMap = existing.stream()
                 .filter(opt -> opt.getId() != null)
                 .collect(Collectors.toMap(BetOption::getId, Function.identity()));

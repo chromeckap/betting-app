@@ -51,7 +51,7 @@ public class GroupMembershipService {
     public List<String> getUsersInGroup(final Long groupId) {
         log.debug("Fetching users in group with id {}", groupId);
 
-        List<GroupMembership> memberships = groupMembershipRepository.findByGroupId(groupId);
+        List<GroupMembership> memberships = groupMembershipRepository.findAllByGroupId(groupId);
         return memberships.stream()
                 .map(GroupMembership::getCreatedBy)
                 .toList();
@@ -70,7 +70,7 @@ public class GroupMembershipService {
     public void joinGroupByCode(final String code) {
         log.debug("User attempting to join group with code {}", code);
 
-        Group group = groupRepository.findByInviteCodeEquals(code)
+        Group group = groupRepository.findByInviteCode(code)
                 .orElseThrow(GroupNotFoundException::new);
         String userId = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Principal::getName)
