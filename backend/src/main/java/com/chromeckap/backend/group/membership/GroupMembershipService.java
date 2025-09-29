@@ -36,7 +36,7 @@ public class GroupMembershipService {
      */
     public GroupMembership findGroupMembershipByGroupIdAndCreatedBy(Long groupId, String userId) {
         return groupMembershipRepository.findByGroupIdAndCreatedBy(groupId, userId)
-                .orElseThrow(GroupMembershipNotFoundException::new);
+                .orElseThrow(() -> new GroupMembershipNotFoundException(groupId, userId));
     }
 
     /**
@@ -71,7 +71,7 @@ public class GroupMembershipService {
         log.debug("User attempting to join group with code {}", code);
 
         Group group = groupRepository.findByInviteCode(code)
-                .orElseThrow(GroupNotFoundException::new);
+                .orElseThrow(() -> new GroupNotFoundException(code));
         String userId = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Principal::getName)
                 .orElseThrow(UserNotAuthenticatedException::new);

@@ -10,7 +10,7 @@ public class BetParticipationValidator {
 
     public void validateBetOpen(Bet bet) {
         if (bet.isResolved() || bet.getStatus() != BetStatus.OPEN)
-            throw new BetClosedException("Bet with id " + bet.getId() + " is not open for participation.");
+            throw new BetClosedException(bet.getId());
     }
 
 }

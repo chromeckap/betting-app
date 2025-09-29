@@ -1,11 +1,11 @@
 package com.chromeckap.backend.exception;
 
-public class LastAdminDemotionException extends RuntimeException {
-    public LastAdminDemotionException(String message) {
-        super(message);
-    }
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public LastAdminDemotionException() {
-        super("Cannot demote the last admin. Promote another member first or delete the group");
-    }
+@Getter
+@AllArgsConstructor
+public class LastAdminDemotionException extends RuntimeException {
+    private final Long groupId;
+    private final String userId;
 }

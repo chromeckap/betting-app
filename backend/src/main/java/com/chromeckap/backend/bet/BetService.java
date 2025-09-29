@@ -35,9 +35,7 @@ public class BetService {
     @Transactional(readOnly = true)
     public Bet findBetByIdAndCategoryId(final Long id, final Long categoryId) {
         return betRepository.findByIdAndCategoryId(id, categoryId)
-                .orElseThrow(() -> new BetNotFoundException(
-                        String.format("Bet with id %s was not found in category %s.", id, categoryId)
-                ));
+                .orElseThrow(() -> new BetNotFoundException(id));
     }
 
     /**

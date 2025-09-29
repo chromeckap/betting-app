@@ -31,7 +31,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public Category findCategoryByIdAndGroupId(final Long id, final Long groupId) {
         return categoryRepository.findByIdAndGroupId(id, groupId)
-                .orElseThrow(CategoryNotFoundException::new);
+                .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 
     /**
