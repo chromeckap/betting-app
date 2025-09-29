@@ -14,14 +14,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class BetService {
     private final BetRepository betRepository;
     private final BetMapper betMapper;
+    private final BetPolicy betPolicy;
     private final CategoryService categoryService;
     private final BetOptionService betOptionService;
 
@@ -53,7 +52,7 @@ public class BetService {
     public Page<BetResponse> getBetsInCategory(final Long groupId, final Long categoryId, Pageable pageable) {
         log.debug("Getting bets in category with id {}", categoryId);
 
-        Page<BetResponse> responsePage = betRepository.findBetByCategoryId(categoryId, pageable)
+        Page<BetResponse> responsePage = betRepository.findAllByCategoryId(categoryId, pageable)
                 .map(betMapper::toResponse);
 
         log.info("Fetched {} bets in category with id {}", responsePage.getSize(), groupId);
@@ -73,7 +72,7 @@ public class BetService {
     public BetResponse getBetById(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Getting bet with id {}", id);
 
-        Bet bet = betRepository.findBetByCategoryId(categoryId);
+        Bet bet = this.findBetByIdAndCategoryId(id, categoryId);
 
         log.info("Fetched bet with id {}", id);
         return betMapper.toResponse(bet);
@@ -142,8 +141,10 @@ public class BetService {
     public void closeBet(final Long groupId, final Long categoryId, final Long id) {
         log.debug("Closing bet {} in category with id {}", id, categoryId);
 
-        Bet bet = this.findBetByIdAndCategoryId(id, categoryId)
-                .withStatus(BetStatus.CLOSED);
+        Bet bet = this.findBetByIdAndCategoryId(id, categoryId);
+        betPolicy.assertClosable(bet);
+
+        bet = bet.withStatus(BetStatus.CLOSED);
 
         betRepository.save(bet);
         log.info("Successfully closed bet with id {} in category {}", bet.getId(), categoryId);
@@ -161,9 +162,12 @@ public class BetService {
     public void evaluateBet(final Long groupId, final Long categoryId, final Long id, final Long correctOptionId) {
         log.debug("Evaluating bet with id {} in category {}", id, categoryId);
 
-        BetOption correctOption = betOptionService.findBetOptionById(correctOptionId);
-        Bet bet = this.findBetByIdAndCategoryId(id, categoryId)
-                .withStatus(BetStatus.RESOLVED)
+        Bet bet = this.findBetByIdAndCategoryId(id, categoryId);
+        betPolicy.assertResolvable(bet);
+
+        BetOption correctOption = betOptionService.findOptionByIdAndBet(correctOptionId, bet);
+
+        bet = bet.withStatus(BetStatus.RESOLVED)
                 .withResolved(true)
                 .withCorrectOption(correctOption);
 

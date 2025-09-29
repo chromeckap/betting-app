@@ -48,8 +48,7 @@ public class BetParticipationService {
         Bet bet = betService.findBetByIdAndCategoryId(betId, categoryId);
         betParticipationValidator.validateBetOpen(bet);
 
-        BetOption selectedOption = betOptionService.findBetOptionById(request.optionId());
-        betParticipationValidator.validateOptionBelongsToBet(selectedOption, bet);
+        BetOption selectedOption = betOptionService.findOptionByIdAndBet(request.optionId(), bet);
 
         BetParticipation betParticipation = betParticipationMapper.toEntity(request)
                 .withSelectedOption(selectedOption)

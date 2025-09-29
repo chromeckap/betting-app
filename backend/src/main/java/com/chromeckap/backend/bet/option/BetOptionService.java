@@ -27,8 +27,8 @@ public class BetOptionService {
     private final BetOptionMapper betOptionMapper;
 
     @Transactional(readOnly = true)
-    public BetOption findBetOptionById(Long optionId) {
-        return betOptionRepository.findById(optionId)
+    public BetOption findOptionByIdAndBet(Long optionId, Bet bet) {
+        return betOptionRepository.findByIdAndBet(optionId, bet)
                 .orElseThrow(() -> new BetNotFoundException(
                         "Bet option with id %s was not found."
                                 .formatted(optionId)

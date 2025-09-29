@@ -9,14 +9,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 interface BetRepository extends JpaRepository<Bet, Long> {
-    List<Bet> findByCategoryId(Long categoryId);
-    Bet findBetByCategoryId(Long categoryId);
-    Page<Bet> findBetByCategoryId(Long categoryId, Pageable pageable);
+    Page<Bet> findAllByCategoryId(Long categoryId, Pageable pageable);
     Optional<Bet> findByIdAndCategoryId(Long id, Long categoryId);
 
     @Modifying
