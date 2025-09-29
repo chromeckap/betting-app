@@ -3,7 +3,6 @@ package com.chromeckap.backend.category;
 import com.chromeckap.backend.exception.CategoryNotFoundException;
 import com.chromeckap.backend.group.Group;
 import com.chromeckap.backend.group.GroupService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,9 +31,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public Category findCategoryByIdAndGroupId(final Long id, final Long groupId) {
         return categoryRepository.findByIdAndGroupId(id, groupId)
-                .orElseThrow(() -> new CategoryNotFoundException(
-                        String.format("Category with id %s was not found in group %s.", id, groupId)
-                ));
+                .orElseThrow(CategoryNotFoundException::new);
     }
 
     /**
@@ -65,7 +62,7 @@ public class CategoryService {
      */
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
-    public Long createCategory(final Long groupId, @Valid final CategoryRequest request) {
+    public Long createCategory(final Long groupId, final CategoryRequest request) {
         log.debug("Creating category {} in group with id {}", request, groupId);
 
         Group group = groupService.findGroupById(groupId);
@@ -89,7 +86,7 @@ public class CategoryService {
      */
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
-    public Long updateCategory(final Long groupId, final Long id, @Valid final CategoryRequest request) {
+    public Long updateCategory(final Long groupId, final Long id, final CategoryRequest request) {
         log.debug("Updating category with id {} in group {} using {}", id, groupId, request);
 
         Category category = this.findCategoryByIdAndGroupId(id, groupId);

@@ -5,7 +5,6 @@ import com.chromeckap.backend.bet.option.BetOptionService;
 import com.chromeckap.backend.category.Category;
 import com.chromeckap.backend.category.CategoryService;
 import com.chromeckap.backend.exception.BetNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -89,7 +88,7 @@ public class BetService {
      */
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
-    public Long createBet(final Long groupId, final Long categoryId, @Valid final BetRequest request) {
+    public Long createBet(final Long groupId, final Long categoryId, final BetRequest request) {
         log.debug("Creating bet {} in category with id {}", request, categoryId);
 
         Category category = categoryService.findCategoryByIdAndGroupId(groupId, categoryId);
@@ -116,7 +115,7 @@ public class BetService {
      */
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupAdmin(#groupId)")
-    public Long updateBet(final Long groupId, final Long categoryId, final Long id, @Valid final BetRequest request) {
+    public Long updateBet(final Long groupId, final Long categoryId, final Long id, final BetRequest request) {
         log.debug("Updating bet with id {} in category {} using {}", id, categoryId, request);
 
         Bet bet = this.findBetByIdAndCategoryId(id, categoryId);

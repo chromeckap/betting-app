@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface ValidDeadline {
 
-    String message() default "Deadline must be at least 5 minutes in the future.";
+    String message() default "{bet.deadline.invalid}";
 
     Class<?>[] groups() default {};
 

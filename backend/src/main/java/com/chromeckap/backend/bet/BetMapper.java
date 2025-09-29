@@ -1,6 +1,5 @@
 package com.chromeckap.backend.bet;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,7 @@ public class BetMapper {
                 .build();
     }
 
-    public Bet updateEntityAttributes(Bet bet, @Valid BetRequest request) {
+    public Bet updateEntityAttributes(Bet bet, BetRequest request) {
         return bet
                 .withName(request.name())
                 .withDescription(request.description())

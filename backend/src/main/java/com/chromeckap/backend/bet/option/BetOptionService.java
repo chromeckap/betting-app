@@ -2,7 +2,6 @@ package com.chromeckap.backend.bet.option;
 
 import com.chromeckap.backend.bet.Bet;
 import com.chromeckap.backend.exception.BetNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ public class BetOptionService {
     }
 
     @Transactional
-    public void manageBetOptions(Bet bet, List<@Valid BetOptionRequest> optionRequests) {
+    public void manageBetOptions(Bet bet, List<BetOptionRequest> optionRequests) {
         log.debug("Managing bet options for bet {} of type {}", bet.getId(), bet.getType());
 
         switch (bet.getType()) {
@@ -85,7 +84,7 @@ public class BetOptionService {
         log.info("Successfully synchronized YES_NO options for bet {}", bet.getId());
     }
 
-    private void manageMultipleChoiceOptions(Bet bet, List<@Valid BetOptionRequest> optionRequests) {
+    private void manageMultipleChoiceOptions(Bet bet, List<BetOptionRequest> optionRequests) {
         log.debug("Managing MULTIPLE_CHOICE options for bet {}", bet.getId());
 
         if (optionRequests == null || optionRequests.isEmpty()) {

@@ -4,7 +4,6 @@ import com.chromeckap.backend.bet.Bet;
 import com.chromeckap.backend.bet.BetService;
 import com.chromeckap.backend.bet.option.BetOption;
 import com.chromeckap.backend.bet.option.BetOptionService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +42,7 @@ public class BetParticipationService {
      */
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
-    public Long participateInBet(final Long groupId, final Long categoryId,final Long betId, @Valid final BetParticipationRequest request) {
+    public Long participateInBet(final Long groupId, final Long categoryId,final Long betId, final BetParticipationRequest request) {
         log.debug("User participating in bet with id {} in category {} and group {}", betId, categoryId, groupId);
 
         Bet bet = betService.findBetByIdAndCategoryId(betId, categoryId);
