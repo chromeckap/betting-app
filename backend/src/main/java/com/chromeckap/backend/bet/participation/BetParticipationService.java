@@ -86,7 +86,7 @@ public class BetParticipationService {
         Bet bet = betService.findBetByIdAndCategoryId(betId, categoryId);
         betParticipationValidator.validateBetOpen(bet);
 
-        BetParticipation participation = betParticipationRepository.findBySelectedOption_Bet_IdAndCreatedBy(betId, currentUserId)
+        BetParticipation participation = betParticipationRepository.findByBetIdAndCreatedBy(betId, currentUserId)
                 .orElseThrow(() -> new IllegalArgumentException("No participation found for user " + currentUserId + " in bet " + betId));
 
         betParticipationRepository.delete(participation);

@@ -45,7 +45,7 @@ public class CategoryService {
     public List<CategoryResponse> getCategoriesInGroup(final Long groupId) {
         log.debug("Getting categories in group with id {}", groupId);
 
-        List<CategoryResponse> responses = categoryRepository.findByGroupId(groupId).stream()
+        List<CategoryResponse> responses = categoryRepository.findAllByGroupId(groupId).stream()
                 .map(categoryMapper::toResponse)
                 .toList();
 

@@ -38,7 +38,7 @@ public class GroupMembershipPermission {
 
     public boolean isNotGroupMember(String inviteCode) {
         String userId = this.getCurrentUserId();
-        return !groupMembershipRepository.existsByGroup_InviteCodeAndCreatedBy(inviteCode, userId);
+        return !groupMembershipRepository.existsByGroupInviteCodeAndCreatedBy(inviteCode, userId);
     }
 
     public boolean canRemoveUserOrSelf(Long groupId, String targetUserId) {
