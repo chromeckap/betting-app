@@ -26,7 +26,6 @@ public class Bet extends AuditingEntity<Bet> {
 
     private String description;
 
-    //todo close bet after the time expires
     @Column(nullable = false)
     private LocalDateTime deadline;
 
