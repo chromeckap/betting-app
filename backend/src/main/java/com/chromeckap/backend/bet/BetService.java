@@ -7,6 +7,8 @@ import com.chromeckap.backend.category.CategoryService;
 import com.chromeckap.backend.exception.BetNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -48,15 +50,14 @@ public class BetService {
      */
     @Transactional(readOnly = true)
     @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
-    public List<BetResponse> getBetsInCategory(final Long groupId, final Long categoryId) { //todo replace list with page
+    public Page<BetResponse> getBetsInCategory(final Long groupId, final Long categoryId, Pageable pageable) {
         log.debug("Getting bets in category with id {}", categoryId);
 
-        List<BetResponse> responses = betRepository.findByCategoryId(categoryId).stream()
-                .map(betMapper::toResponse)
-                .toList();
+        Page<BetResponse> responsePage = betRepository.findBetByCategoryId(categoryId, pageable)
+                .map(betMapper::toResponse);
 
-        log.info("Fetched {} bets in category with id {}", responses.size(), groupId);
-        return responses;
+        log.info("Fetched {} bets in category with id {}", responsePage.getSize(), groupId);
+        return responsePage;
     }
 
     /**
@@ -91,7 +92,7 @@ public class BetService {
     public Long createBet(final Long groupId, final Long categoryId, final BetRequest request) {
         log.debug("Creating bet {} in category with id {}", request, categoryId);
 
-        Category category = categoryService.findCategoryByIdAndGroupId(groupId, categoryId);
+        Category category = categoryService.findCategoryByIdAndGroupId(categoryId, groupId);
         Bet bet = betMapper.toEntity(request)
                 .withCategory(category)
                 .withCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
