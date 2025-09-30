@@ -15,6 +15,7 @@ public class GroupMapper {
 
     public GroupResponse toResponse(Group group) {
         return GroupResponse.builder()
+                .id(group.getId())
                 .name(group.getName())
                 .inviteCode(group.getInviteCode())
                 .build();
