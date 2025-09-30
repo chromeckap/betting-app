@@ -18,6 +18,7 @@ public class BetMapper {
 
     public BetResponse toResponse(Bet bet) {
         return BetResponse.builder()
+                .id(bet.getId())
                 .name(bet.getName())
                 .description(bet.getDescription())
                 .deadline(bet.getDeadline())

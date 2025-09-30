@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record BetResponse(
+        Long id,
         String name,
         String description,
         LocalDateTime deadline,
