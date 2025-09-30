@@ -4,6 +4,7 @@ import com.chromeckap.backend.bet.Bet;
 import com.chromeckap.backend.bet.BetService;
 import com.chromeckap.backend.bet.option.BetOption;
 import com.chromeckap.backend.bet.option.BetOptionService;
+import com.chromeckap.backend.exception.BetParticipationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,20 +45,22 @@ public class BetParticipationService {
     @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public Long participateInBet(final Long groupId, final Long categoryId,final Long betId, final BetParticipationRequest request) {
         log.debug("User participating in bet with id {} in category {} and group {}", betId, categoryId, groupId);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Bet bet = betService.findBetByIdAndCategoryId(betId, categoryId);
         betParticipationValidator.validateBetOpen(bet);
+        betParticipationValidator.assertUserNotParticipating(betId, userId);
 
         BetOption selectedOption = betOptionService.findOptionByIdAndBet(request.optionId(), bet);
 
         BetParticipation betParticipation = betParticipationMapper.toEntity(request)
                 .withSelectedOption(selectedOption)
-                .withCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+                .withCreatedBy(userId);
 
         BetParticipation savedBetParticipation = betParticipationRepository.save(betParticipation);
         log.info("Successfully created bet participation {}", savedBetParticipation);
 
-        return  savedBetParticipation.getId();
+        return savedBetParticipation.getId();
     }
 
     /**
@@ -80,18 +83,18 @@ public class BetParticipationService {
     @Transactional
     @PreAuthorize("@groupMembershipPermission.isGroupMember(#groupId)")
     public void cancelParticipationInBet(final Long groupId, final Long categoryId, final Long betId) {
-        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.debug("User={} requests cancellation of participation in bet={} in group {}", currentUserId, betId, groupId);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.debug("User={} requests cancellation of participation in bet={} in group {}", userId, betId, groupId);
 
         Bet bet = betService.findBetByIdAndCategoryId(betId, categoryId);
         betParticipationValidator.validateBetOpen(bet);
 
-        BetParticipation participation = betParticipationRepository.findByBetIdAndCreatedBy(betId, currentUserId)
-                .orElseThrow(() -> new IllegalArgumentException("No participation found for user " + currentUserId + " in bet " + betId));
+        BetParticipation participation = betParticipationRepository.findByBetIdAndCreatedBy(betId, userId)
+                .orElseThrow(() -> new BetParticipationNotFoundException(betId, userId));
 
         betParticipationRepository.delete(participation);
 
-        log.info("User={} successfully canceled participation in bet={}", currentUserId, betId);
+        log.info("User={} successfully canceled participation in bet={}", userId, betId);
     }
 
 }

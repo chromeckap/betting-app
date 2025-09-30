@@ -21,6 +21,28 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     private final MessageSource messageSource;
 
+    @ExceptionHandler(BetParticipationNotFoundException.class)
+    public ProblemDetail handle(BetParticipationNotFoundException e) {
+        String message = messageSource.getMessage(
+                "bet.participation.not.found",
+                new Object[]{e.getBetId(), e.getUserId()},
+                LocaleContextHolder.getLocale()
+        );
+        log.error("Bet participation was not found: {}", e.getMessage(), e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, message);
+    }
+
+    @ExceptionHandler(AlreadyParticipatingException.class)
+    public ProblemDetail handle(AlreadyParticipatingException e) {
+        String message = messageSource.getMessage(
+                "bet.already.participating",
+                new Object[]{e.getBetId(), e.getUserId()},
+                LocaleContextHolder.getLocale()
+        );
+        log.error("Already participating in bet: {}", e.getMessage(), e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, message);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ProblemDetail> handle(MethodArgumentNotValidException e) {
         String message = messageSource.getMessage(

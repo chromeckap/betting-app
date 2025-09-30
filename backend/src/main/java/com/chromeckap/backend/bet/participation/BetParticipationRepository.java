@@ -27,4 +27,24 @@ interface BetParticipationRepository extends JpaRepository<BetParticipation, Lon
             @Param("betId") Long betId,
             @Param("createdBy") String createdBy
     );
+
+    /**
+     * Checks whether a participation already exists for the given user and bet.
+     * <p>
+     * Uses JPQL to count matching participations.
+     *
+     * @param betId     the ID of the bet
+     * @param userId the username (or ID) of the user
+     * @return {@code true} if the user already participates in the bet, {@code false} otherwise
+     */
+    @Query("""
+           SELECT COUNT(p) > 0
+           FROM BetParticipation p
+           WHERE p.selectedOption.bet.id = :betId
+           AND p.createdBy = :createdBy
+           """)
+    boolean existsByBetIdAndCreatedBy(
+            @Param("betId") Long betId,
+            @Param("createdBy") String createdBy
+    );
 }
