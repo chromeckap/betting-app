@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class BetParticipationValidator {
+public class BetParticipationPolicy {
     private final BetParticipationRepository betParticipationRepository;
 
-    public void validateBetOpen(Bet bet) {
+    public void assertBetOpen(Bet bet) {
         if (bet.isResolved() || bet.getStatus() != BetStatus.OPEN)
             throw new BetClosedException(bet.getId());
     }
