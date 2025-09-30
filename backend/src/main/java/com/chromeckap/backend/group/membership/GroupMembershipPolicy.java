@@ -13,10 +13,10 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class GroupMembershipValidator {
+public class GroupMembershipPolicy {
     private final GroupMembershipRepository repository;
 
-    public void validateUserRemoval(Long groupId, String userId) {
+    public void assertUserRemovable(Long groupId, String userId) {
         List<GroupMembership> members = repository.findAllByGroupId(groupId);
 
         if (this.isLastMember(members, userId))
@@ -28,7 +28,7 @@ public class GroupMembershipValidator {
         log.debug("User {} can be removed from group {}", userId, groupId);
     }
 
-    public void validateRoleChange(Long groupId, String userId, GroupRole newRole) {
+    public void assertRoleChangeable(Long groupId, String userId, GroupRole newRole) {
         if (newRole == GroupRole.ADMIN) return;
         List<GroupMembership> members = repository.findAllByGroupId(groupId);
 

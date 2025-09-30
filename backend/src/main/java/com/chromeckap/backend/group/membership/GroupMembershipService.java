@@ -24,7 +24,7 @@ public class GroupMembershipService {
     private final GroupMembershipRepository groupMembershipRepository;
     private final GroupRepository groupRepository;
     private final GroupMembershipMapper groupMembershipMapper;
-    private final GroupMembershipValidator groupMembershipValidator;
+    private final GroupMembershipPolicy groupMembershipPolicy;
 
     /**
      * Finds a group membership by group ID and user ID.
@@ -98,7 +98,7 @@ public class GroupMembershipService {
     public void updateUserRoleInGroup(final Long groupId, final String userId, final GroupRole role) {
         log.debug("Updating role for user {} in group {} to {}", userId, groupId, role);
 
-        groupMembershipValidator.validateRoleChange(groupId, userId, role);
+        groupMembershipPolicy.assertRoleChangeable(groupId, userId, role);
 
         GroupMembership membership = this.findGroupMembershipByGroupIdAndCreatedBy(groupId, userId)
                 .withRole(role);
@@ -120,7 +120,7 @@ public class GroupMembershipService {
     public void removeUserFromGroup(final Long groupId, final String userId) {
         log.debug("Removing user {} from group {}", userId, groupId);
 
-        groupMembershipValidator.validateUserRemoval(groupId, userId);
+        groupMembershipPolicy.assertUserRemovable(groupId, userId);
 
         GroupMembership membership = this.findGroupMembershipByGroupIdAndCreatedBy(groupId, userId);
         groupMembershipRepository.delete(membership);

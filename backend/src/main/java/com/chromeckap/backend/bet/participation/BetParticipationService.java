@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BetParticipationService {
     private final BetParticipationRepository betParticipationRepository;
     private final BetParticipationMapper betParticipationMapper;
-    private final BetParticipationValidator betParticipationValidator;
+    private final BetParticipationPolicy betParticipationPolicy;
     private final BetOptionService betOptionService;
     private final BetService betService;
 
@@ -48,8 +48,8 @@ public class BetParticipationService {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Bet bet = betService.findBetByIdAndCategoryId(betId, categoryId);
-        betParticipationValidator.validateBetOpen(bet);
-        betParticipationValidator.assertUserNotParticipating(betId, userId);
+        betParticipationPolicy.assertBetOpen(bet);
+        betParticipationPolicy.assertUserNotParticipating(betId, userId);
 
         BetOption selectedOption = betOptionService.findOptionByIdAndBet(request.optionId(), bet);
 
@@ -87,7 +87,7 @@ public class BetParticipationService {
         log.debug("User={} requests cancellation of participation in bet={} in group {}", userId, betId, groupId);
 
         Bet bet = betService.findBetByIdAndCategoryId(betId, categoryId);
-        betParticipationValidator.validateBetOpen(bet);
+        betParticipationPolicy.assertBetOpen(bet);
 
         BetParticipation participation = betParticipationRepository.findByBetIdAndCreatedBy(betId, userId)
                 .orElseThrow(() -> new BetParticipationNotFoundException(betId, userId));
