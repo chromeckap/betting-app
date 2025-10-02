@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/groups")
 @RequiredArgsConstructor
@@ -23,6 +25,13 @@ public class GroupController {
         log.info("Fetching group with id {}", id);
         GroupResponse response = groupService.getGroupById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<GroupResponse>> getUserGroups() {
+        log.info("Fetching user groups");
+        List<GroupResponse> responses = groupService.getUserGroups();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping

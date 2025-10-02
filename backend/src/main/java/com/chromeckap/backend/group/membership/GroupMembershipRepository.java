@@ -70,4 +70,18 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
            ORDER BY gm.role ASC
            """)
     List<GroupMembership> findAllByGroupId(@Param("groupId") Long groupId);
+
+    /**
+     * Retrieves all memberships for a given user.
+     *
+     * @param userId the user's unique identifier
+     * @return a list of {@link GroupMembership} entities for the specified user
+     */
+    @Query("""
+           SELECT gm
+           FROM GroupMembership gm
+           WHERE gm.createdBy = :userId
+           ORDER BY gm.createdAt ASC
+           """)
+    List<GroupMembership> findAllByCreatedBy(@Param("userId") String userId);
 }
