@@ -88,6 +88,7 @@ public class GroupService {
      * @return the id of the newly created group
      */
     @Transactional
+    @PreAuthorize("isFullyAuthenticated()") //todo add to other methods
     public Long createGroup(final GroupRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Creating group {}", request);
