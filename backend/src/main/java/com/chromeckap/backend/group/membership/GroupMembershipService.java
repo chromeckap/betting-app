@@ -40,6 +40,16 @@ public class GroupMembershipService {
     }
 
     /**
+     * Retrieves all group memberships for the given user.
+     *
+     * @param userId the unique identifier of the user
+     * @return a list of {@link GroupMembership} entities where the user is a member
+     */
+    public List<GroupMembership> findAllGroupMembershipsByUserId(String userId) {
+        return groupMembershipRepository.findAllByCreatedBy(userId);
+    }
+
+    /**
      * Retrieves all usernames of members in a given group.
      * Requires the current user to be a member of the group.
      *

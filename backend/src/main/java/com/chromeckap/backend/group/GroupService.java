@@ -1,6 +1,7 @@
 package com.chromeckap.backend.group;
 
 import com.chromeckap.backend.exception.GroupNotFoundException;
+import com.chromeckap.backend.group.membership.GroupMembership;
 import com.chromeckap.backend.group.membership.GroupMembershipService;
 import com.chromeckap.backend.utils.InviteCodeGenerator;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +49,35 @@ public class GroupService {
 
         Group group = this.findGroupById(id);
         return groupMapper.toResponse(group);
+    }
+
+    /**
+     * Retrieves all groups in which the currently authenticated user is a member.
+     * <p>
+     * This method uses the {@link SecurityContextHolder} to obtain the current user's identifier
+     * and fetches all corresponding {@link GroupMembership} entities. Each membership is then
+     * mapped to its {@link GroupResponse} using the {@link GroupMapper}.
+     * </p>
+     *
+     * <p>
+     * Security: Only fully authenticated users can access this method, enforced by
+     * {@link org.springframework.security.access.prepost.PreAuthorize}.
+     * </p>
+     *
+     * @return a list of {@link GroupResponse} representing the groups of the current user
+     */
+    @Transactional(readOnly = true)
+    @PreAuthorize("isFullyAuthenticated()")
+    public List<GroupResponse> getUserGroups() {
+        log.debug("Fetching user groups");
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<GroupMembership> userMemberships = groupMembershipService.findAllGroupMembershipsByUserId(userId);
+
+        return userMemberships.stream()
+                .map(GroupMembership::getGroup)
+                .map(groupMapper::toResponse)
+                .toList();
     }
 
     /**
@@ -118,5 +150,4 @@ public class GroupService {
 
         return code;
     }
-
 }
